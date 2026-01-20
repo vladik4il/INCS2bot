@@ -27,6 +27,10 @@ execution_cron = (execution_start_dt + dt.timedelta(minutes=2)).replace(second=0
 
 CURRENT_PREMIER_SEASON = 3
 UPDATE_CACHE_INTERVAL = 40
+MISFIRE_GRACE_TIME = 10
+
+DAY = 24 * 60 * 60
+PLAYER_GRAPH_UPDATE_INTERVAL = 10 * 60
 
 loc = locale('ru')
 
@@ -106,7 +110,8 @@ async def update_cache_info():
 
         
 @scheduler.scheduled_job('cron',
-                         hour=execution_cron.hour, minute=execution_cron.minute, second=0)
+                         hour=execution_cron.hour, minute=execution_cron.minute, second=0,
+                         misfire_grace_time=MISFIRE_GRACE_TIME)
 @exception_handler(message='Caught exception while gathering monthly players!', retry=True)
 async def unique_monthly():
     new_player_count = steam_webapi.cs2_get_monthly_player_count()
@@ -125,7 +130,8 @@ async def unique_monthly():
 
 
 @scheduler.scheduled_job('cron',
-                         hour=execution_cron.hour, minute=execution_cron.minute, second=0)
+                         hour=execution_cron.hour, minute=execution_cron.minute, second=0,
+                         misfire_grace_time=MISFIRE_GRACE_TIME)
 @exception_handler(message='Caught exception while gathering key price!', retry=True)
 async def check_currency():
     new_prices = ExchangeRate.request(steam_webapi).asdict()
@@ -134,7 +140,8 @@ async def check_currency():
 
 
 @scheduler.scheduled_job('cron',
-                         hour=execution_cron.hour, minute=execution_cron.minute, second=0)
+                         hour=execution_cron.hour, minute=execution_cron.minute, second=0,
+                         misfire_grace_time=MISFIRE_GRACE_TIME)
 async def fetch_leaderboard():
     # noinspection PyBroadException
     try:
