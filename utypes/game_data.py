@@ -200,7 +200,7 @@ class GameVersion:
         """Get the version of the game"""
 
         cs2_client_version = gc_cache.get('cs2_client_version', States.UNKNOWN.literal)
-        cs2_server_version = gc_cache.get('cs2_client_version', States.UNKNOWN.literal)
+        cs2_server_version = gc_cache.get('cs2_server_version', States.UNKNOWN.literal)
         cs2_patch_version = gc_cache.get('cs2_patch_version', States.UNKNOWN.literal)
 
         cs2_version_timestamp = gc_cache.get('cs2_version_timestamp', 0)
