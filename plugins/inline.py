@@ -7,7 +7,7 @@ import traceback
 from typing import TYPE_CHECKING
 
 from pyrogram.enums import ParseMode
-from pyrogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent
+from pyrogram.types import InlineQuery, InlineQueryResultArticle, InputTextMessageContent, LinkPreviewOptions
 
 from bottypes import BotClient, UserSession
 import config
@@ -335,7 +335,8 @@ async def default_inline(_, session: UserSession, inline_query: InlineQuery):
                                               reply_markup=inline_btn,
                                               thumb_url="https://telegra.ph/file/6948255408689d2f6a472.jpg")
     game_version = InlineQueryResultArticle(session.locale.game_version_inline_title,
-                                            InputTextMessageContent(game_version_text, disable_web_page_preview=True),
+                                            InputTextMessageContent(game_version_text,
+                                                                    link_preview_options=LinkPreviewOptions(is_disabled=True)),
                                             '4',
                                             description=session.locale.game_version_inline_description,
                                             reply_markup=inline_btn,

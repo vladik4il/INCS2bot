@@ -11,6 +11,7 @@ from csgo.client import CSGOClient
 import gevent
 from pyrogram import Client
 import requests
+from pyrogram.types import LinkPreviewOptions
 from steam.client import SteamClient
 from steam.enums import EResult
 
@@ -322,7 +323,7 @@ async def send_text_alert(text: str):
         chat_list = [config.INCS2CHAT, config.CSTRACKER]
 
     for chat_id in chat_list:
-        msg = await bot.send_message(chat_id, text, disable_web_page_preview=True)
+        msg = await bot.send_message(chat_id, text, link_preview_options=LinkPreviewOptions(is_disabled=True))
         if chat_id == config.INCS2CHAT:
             await msg.pin(disable_notification=True)
 

@@ -449,7 +449,7 @@ class BotClient(Client):
                           timeout: int = None,
                           parse_mode: ParseMode = None,
                           entities: list[MessageEntity] = None,
-                          disable_web_page_preview: bool = None,
+                          disable_web_page_preview: bool = None,  # todo: might be not working in the future
                           disable_notification: bool = None,
                           reply_to_message_id: int = None,
                           schedule_date: dt.datetime = None,

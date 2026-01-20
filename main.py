@@ -13,7 +13,7 @@ from csxhair import Crosshair
 from pyrogram import filters
 from pyrogram.enums import ChatType, ChatAction, ParseMode
 from pyrogram.errors import MessageDeleteForbidden, MessageNotModified, PeerIdInvalid
-from pyrogram.types import CallbackQuery, Message
+from pyrogram.types import CallbackQuery, Message, LinkPreviewOptions
 # noinspection PyUnresolvedReferences
 from pyropatch import pyropatch  # do not remove this!!
 from telegraph.aio import Telegraph
@@ -424,7 +424,7 @@ async def user_profile_info_process(client: BotClient, session: UserSession, bot
 
     text = session.locale.user_profileinfo_text.format(*info.to_tuple())
 
-    await info_message.edit(text, disable_web_page_preview=True)
+    await info_message.edit(text, link_preview_options=LinkPreviewOptions(is_disabled=True))
     return await user_input.reply(session.locale.bot_loading)
 
 
@@ -584,7 +584,7 @@ async def send_game_version(_, session: UserSession, bot_message: Message):
     text = info_formatters.format_game_version_info(data, session.locale)
 
     await bot_message.edit(text, reply_markup=keyboards.extra_markup(session.locale),
-                           disable_web_page_preview=True)
+                           link_preview_options=LinkPreviewOptions(is_disabled=True))
 
 
 @bot.navmenu(LK.game_leaderboard_button_title, came_from=extra_features, ignore_message_not_modified=True)
@@ -871,7 +871,7 @@ async def about_us(_, session: UserSession, bot_message: Message):
 @bot.funcmenu(LK.bot_feedback_button_title, came_from=bot_help_section, ignore_message_not_modified=True)
 async def feedback(_, session: UserSession, bot_message: Message):
     await bot_message.edit(session.locale.bot_feedback_text,
-                           disable_web_page_preview=True,
+                           link_preview_options=LinkPreviewOptions(is_disabled=True),
                            reply_markup=keyboards.help_markup(session.locale))
 
 

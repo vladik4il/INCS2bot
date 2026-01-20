@@ -5,7 +5,8 @@ import random
 
 from pyrogram import Client, filters
 from pyrogram.enums import ChatMembersFilter
-from pyrogram.types import Chat, Message, MessageEntity, User
+from pyrogram.types import Chat, Message, MessageEntity, User, MessageOriginUser, MessageOriginChat, \
+    MessageOriginChannel, LinkPreviewOptions
 
 import config
 
@@ -88,10 +89,12 @@ async def filter_message(message: Message):
 
     if message.via_bot:
         senders_ids.add(message.via_bot.id)
-    if message.forward_from:
-        senders_ids.add(message.forward_from.id)
-    if message.forward_from_chat:
-        senders_ids.add(message.forward_from_chat.id)
+    origin = message.forward_origin
+    if origin:
+        if isinstance(origin, MessageOriginUser):
+            senders_ids.add(origin.sender_user.id)
+        if isinstance(origin, MessageOriginChat):
+            senders_ids.add(origin.sender_chat)
 
     if (senders_ids & filtered_stuff['forwards'].keys()
             or (message.dice and message.dice.emoji in filtered_stuff['text'])
@@ -128,8 +131,18 @@ async def addfilter_forward(message: Message):
         return
 
     things_to_filter = {}
-    for source in [source_msg.via_bot, source_msg.forward_from, source_msg.forward_from_chat]:
-        if source:
+    if source_msg.via_bot:
+        source = source_msg.via_bot
+        things_to_filter[source.id] = source.username
+    elif source_msg.forward_origin:
+        if isinstance(source_msg.forward_origin, MessageOriginChannel):
+            source = source_msg.forward_origin.chat
+            things_to_filter[source.id] = source.username
+        elif isinstance(source_msg.forward_origin, MessageOriginChat):
+            source = source_msg.forward_origin.sender_chat
+            things_to_filter[source.id] = source.username
+        elif isinstance(source_msg.forward_origin, MessageOriginUser):
+            source = source_msg.forward_origin.sender_user
             things_to_filter[source.id] = source.username
 
     if not things_to_filter:
@@ -244,7 +257,8 @@ async def echo(client: Client, message: Message):
             return
 
         entities = correct_message_entities(message.entities, message.text, text)
-        return await reply_to.reply(text, entities=entities, quote=should_reply, disable_web_page_preview=True)
+        return await reply_to.reply(text, entities=entities, quote=should_reply,
+                                    link_preview_options=LinkPreviewOptions(is_disabled=True))
 
     caption = message.caption.removeprefix('/echo').strip()
     entities = correct_message_entities(message.entities, message.caption, caption)
