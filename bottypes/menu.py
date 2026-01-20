@@ -19,7 +19,7 @@ if typing.TYPE_CHECKING:
 class Menu:
     def __init__(self,
                  _id: str,
-                 func: callable,
+                 func: Callable[[BotClient, UserSession, Message, ...], ...],
                  *args,
                  came_from_menu_id: str | None = None,
                  ignore_message_not_modified: bool,
@@ -65,7 +65,7 @@ class NavMenu(Menu):
 
     def __init__(self,
                  _id: str,
-                 func: callable,
+                 func: Callable[[BotClient, UserSession, Message, ...], ...],
                  *args,
                  came_from_menu_id: str | None = None,
                  ignore_message_not_modified: bool,
@@ -81,7 +81,7 @@ class NavMenu(Menu):
         self._message_process = self.process_wrapper(message_process)
         self._callback_process = self.process_wrapper(callback_process)
 
-    def process_wrapper(self, process: Callable):
+    def process_wrapper(self, process: MessageProcess | CallbackProcess):
         if process is None:
             return
 

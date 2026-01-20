@@ -36,6 +36,7 @@ class EnhancedRotatingFileHandler(TimedRotatingFileHandler):
             return True
         return False
 
+    @override
     def doRollover(self):
         if self.stream:
             self.stream.close()
@@ -85,6 +86,7 @@ class EnhancedRotatingFileHandler(TimedRotatingFileHandler):
                 newRolloverAt += addend
         self.rolloverAt = newRolloverAt
 
+    @override
     def getFilesToDelete(self):
         """
         Determine the files to delete when rolling over.

@@ -166,7 +166,7 @@ async def update_depots():
     except Exception:
         logger.exception('Caught an exception while trying to fetch depots!')
         return
-    except gevent.Timeout:  # still no idea how to solve it so just crash and restart the entire thing
+    except gevent.Timeout:  # still no idea how to solve it so just crash and restart the entire thing somewhere else
         going_to_shutdown = True
         logger.exception('Caught gevent.Timeout, we\'re going to shutdown...')
         return
@@ -254,12 +254,12 @@ async def check_for_branches_updates(cache: dict, cached_branches: dict, current
         await send_branch_alert(branch_name, event, new_buildid)
 
 
-async def get_game_version_loop(cs2_client_version: int | None) -> GameVersionData:
+async def get_game_version_loop(cached_client_version: int | None) -> GameVersionData:
     timeout = 30 * 60
     timeout_start = time.time()
     with requests.Session() as session:
         while time.time() < timeout_start + timeout:
-            data = await get_game_version(session, cs2_client_version)
+            data = await get_game_version(session, cached_client_version)
             if data:
                 return data
             logger.warning('Failed to pull the game version data, retry in 45 seconds...')
@@ -268,15 +268,15 @@ async def get_game_version_loop(cs2_client_version: int | None) -> GameVersionDa
     # because of this, we retry in an hour
     logger.warning('Reached a timeout while trying to pull the game version data, retry in an hour...')
     await asyncio.sleep(60 * 60)
-    return await get_game_version_loop(cs2_client_version)
+    return await get_game_version_loop(cached_client_version)
 
 
-async def get_game_version(session: requests.Session, cs2_client_version: int | None) -> GameVersionData | None:
+async def get_game_version(session: requests.Session, cached_client_version: int | None) -> GameVersionData | None:
     # noinspection PyBroadException
     try:
         data = GameVersion.request(session)
 
-        if cs2_client_version is None:  # *somehow* don't have anything cached
+        if cached_client_version is None:  # *somehow* don't have anything cached
             logger.info('Successfully pulled the game version data.')
             return data
 
@@ -285,7 +285,7 @@ async def get_game_version(session: requests.Session, cs2_client_version: int | 
                              .replace(tzinfo=VALVE_TIMEZONE).astimezone(dt.UTC))
         is_up_to_date = (utime.utcnow() - new_data_datetime < dt.timedelta(hours=12))
 
-        if is_up_to_date and data.cs2_client_version != cs2_client_version:
+        if is_up_to_date and data.cs2_client_version != cached_client_version:
             logger.info('Successfully pulled the game version data.')
             return data
     except Exception:

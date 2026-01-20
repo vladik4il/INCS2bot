@@ -117,17 +117,18 @@ def format_matchmaking_stats(data: MatchmakingStatsData, locale: Locale) -> str:
 
 
 def format_datacenter_state(state: DatacenterStateVariation, locale: Locale, latest_info_update_at: dt.datetime):
+    info = None
     if isinstance(state, DatacenterState):
         info = pack_formatting_singular_datacenter_state(state, locale)
-        return '\n\n'.join((*info, format_latest_info_updated(latest_info_update_at, locale)))
 
     if isinstance(state, DatacenterRegionState):
         info = pack_formatting_datacenter_region_state(state, locale)
-        return '\n\n'.join((*info, format_latest_info_updated(latest_info_update_at, locale)))
 
     if isinstance(state, DatacenterGroupState):
         info = pack_formatting_datacenter_group_state(state, locale)
-        return '\n\n'.join((*info, format_latest_info_updated(latest_info_update_at, locale)))
+
+    lines = (*info, format_latest_info_updated(latest_info_update_at, locale))
+    return '\n\n'.join(lines) if info is not None else ''
 
 
 def pack_formatting_singular_datacenter_state(state: DatacenterState, locale: Locale):
@@ -154,8 +155,7 @@ def pack_formatting_datacenter_group_state(state: DatacenterGroupState, locale: 
 
 
 def format_datacenter_state_header(dc: Datacenter | DatacenterRegion, locale: Locale):
-    return locale.dc_status_text_title.format(dc.symbol,
-                                              locale.get(dc.l10n_key_title))
+    return locale.dc_status_text_title.format(dc.symbol, locale.get(dc.l10n_key_title))
 
 
 def format_datacenter_state_summary(state: DatacenterState | DatacenterRegionState, locale: Locale):
