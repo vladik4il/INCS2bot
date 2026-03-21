@@ -33,10 +33,7 @@ class SteamWebAPI:
             timeout=self.timeout
         )
 
-        try:
-            return response.json()
-        except requests.exceptions.JSONDecodeError:
-            return response
+        return response.json()
 
     def close(self):
         self.session.close()
