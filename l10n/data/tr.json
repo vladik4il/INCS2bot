@@ -4,9 +4,9 @@
         "👋🏼 Merhaba, {}!",
         "Bu bot, çevrimiçi oyuncuların sayısını ve Counter-Strike sunucularının kullanılabilirliğini kontrol etmek için tasarlanmıştır."
     ],
-    "bot_help_text": "[‎](https://t.me/INCS2)ℹ️ Bu bot @INCS2 kanalı tarafından geliştirilip sürdürülmektedir. Kaynak kodu şu adreste bulunabilir: [GitHub](https://github.com/aquaismissing/INCS2bot).",
+    "bot_help_text": "[‎](https://t.me/INCS2)ℹ️ Bu bot @INCS2 kanalı tarafından geliştirilip sürdürülmektedir. Kaynak kodu şu adreste bulunabilir: [GitHub](https://github.com/vladik4il/INCS2bot).",
     "bot_feedback_text": [
-        "💬 You can report any bugs found in the bot or submit a suggestion on our [GitHub issues](https://github.com/aquaismissing/INCS2bot/issues).",
+        "💬 You can report any bugs found in the bot or submit a suggestion on our [GitHub issues](https://github.com/vladik4il/INCS2bot/issues).",
         "If you plan to leave any feedback there, we kindly ask you to write it in English.",
         "",
         "Thanks in advance! ❤️"
@@ -403,10 +403,10 @@
     "steam_url_example": [
         "🔗 Lütfen aşağıdaki seçeneklerden birini girin:",
         "",
-        "• Profil bağlantısı (ör.: `https://steamcommunity.com/id/aquaismissing`)",
-        "• Profile kalıcı bağlantı (ör.: `https://steamcommunity.com/profiles/76561198346163255`)",
-        "• SteamID (ör.: `76561198346163255`)",
-        "• kişisel bağlantı (ör.: `aquaismissing`)"
+        "• Profil bağlantısı (ör.: `https://steamcommunity.com/id/technontc`)",
+        "• Profile kalıcı bağlantı (ör.: `https://steamcommunity.com/profiles/76561198966340160`)",
+        "• SteamID (ör.: `76561198966340160`)",
+        "• kişisel bağlantı (ör.: `technontc`)"
     ],
     "settings_language_button_title": "Language",
     "settings_language_choose": [

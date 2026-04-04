@@ -4,9 +4,9 @@
         "👋🏼 Ciao, {}!",
         "Questo bot è stato creato per controllare il numero dei giocatori online e la disponibilità dei server di Counter-Strike."
     ],
-    "bot_help_text": "[‎](https://t.me/INCS2)ℹ️ Questo bot è sviluppato e gestito da @INCS2. Puoi visionare il codice sorgente su [GitHub](https://github.com/aquaismissing/INCS2bot).",
+    "bot_help_text": "[‎](https://t.me/INCS2)ℹ️ Questo bot è sviluppato e gestito da @INCS2. Puoi visionare il codice sorgente su [GitHub](https://github.com/vladik4il/INCS2bot).",
     "bot_feedback_text": [
-        "💬 You can report any bugs found in the bot or submit a suggestion on our [GitHub issues](https://github.com/aquaismissing/INCS2bot/issues).",
+        "💬 You can report any bugs found in the bot or submit a suggestion on our [GitHub issues](https://github.com/vladik4il/INCS2bot/issues).",
         "If you plan to leave any feedback there, we kindly ask you to write it in English.",
         "",
         "Thanks in advance! ❤️"
@@ -402,10 +402,10 @@
     "steam_url_example": [
         "🔗 Per favore, inserisci una delle seguenti opzioni:",
         "",
-        "• Link del profilo (es: `https://steamcommunity.com/id/aquaismissing`)",
-        "• Link permanente del profilo (es: `https://steamcommunity.com/profiles/76561198346163255`)",
-        "• SteamID (es: `76561198346163255`)",
-        "• URL personalizzato (es: `aquaismissing`)"
+        "• Link del profilo (es: `https://steamcommunity.com/id/technontc`)",
+        "• Link permanente del profilo (es: `https://steamcommunity.com/profiles/76561198966340160`)",
+        "• SteamID (es: `76561198966340160`)",
+        "• URL personalizzato (es: `technontc`)"
     ],
     "settings_language_button_title": "Lingua",
     "settings_language_choose": [

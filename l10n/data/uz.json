@@ -4,9 +4,9 @@
         "👋🏼 Salom, {}!",
         "Ushbu bot onlayn o'yinchilar sonini va Counter-Strike serverlarining mavjudligini tekshirish uchun mo'ljallangan."
     ],
-    "bot_help_text": "[‎](https://t.me/INCS2)ℹ️ Ushbu bot @INCS2 telegram kanalini tomonidan ishlab chiqilgan va yuritiladi. Manba kodi [GitHub](https://github.com/aquaismissing/INCS2bot) da mavjud.",
+    "bot_help_text": "[‎](https://t.me/INCS2)ℹ️ Ushbu bot @INCS2 telegram kanalini tomonidan ishlab chiqilgan va yuritiladi. Manba kodi [GitHub](https://github.com/vladik4il/INCS2bot) da mavjud.",
     "bot_feedback_text": [
-        "💬 Вы можете рассказать об ошибках в работе бота, с которыми вы столкнулись, или предложить свою идею на нашем [GitHub](https://github.com/aquaismissing/INCS2bot/issues).",
+        "💬 Вы можете рассказать об ошибках в работе бота, с которыми вы столкнулись, или предложить свою идею на нашем [GitHub](https://github.com/vladik4il/INCS2bot/issues).",
         "Убедительная просьба писать туда свои сообщения на английском или, в крайнем случае, на русском языке.",
         "",
         "Заранее спасибо! ❤️"
@@ -403,10 +403,10 @@
     "steam_url_example": [
         "🔗 Quyidagi variantlardan birini kiriting:",
         "",
-        "• Profilga havola (Masalan.: `https://steamcommunity.com/id/aquaismissing`)",
-        "• Profilga doimiy havola (Masalan.: `https://steamcommunity.com/profiles/76561198346163255`)",
-        "• SteamID (Masalan.: `76561198346163255`)",
-        "• Shaxsiy havola (Masalan.: `aquaismissing`)"
+        "• Profilga havola (Masalan.: `https://steamcommunity.com/id/technontc`)",
+        "• Profilga doimiy havola (Masalan.: `https://steamcommunity.com/profiles/76561198966340160`)",
+        "• SteamID (Masalan.: `76561198966340160`)",
+        "• Shaxsiy havola (Masalan.: `technontc`)"
     ],
     "settings_language_button_title": "Язык",
     "settings_language_choose": [
