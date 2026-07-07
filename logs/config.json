@@ -24,7 +24,7 @@
       "()": "functions.ulogging.EnhancedRotatingFileHandler",
       "filename": "logs/app.log",
       "when": "MIDNIGHT",
-      "maxBytes": 4194304,
+      "maxBytes": 16777216,
       "backupCount": 5,
       "level": "INFO",
       "formatter": "simple"
