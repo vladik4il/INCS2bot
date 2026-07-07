@@ -101,6 +101,7 @@ def send_relogin():  # todo: do we actually need this?
     if client.relogin_available:
         client.relogin()
         logger.debug('"client.relogin()" executed successfully..?')
+        (config.GC_CACHE_FILE_PATH.parent / 'relogin').touch(exist_ok=True)
 
 
 @client.on(SteamClient.EVENT_CONNECTED)
@@ -167,7 +168,8 @@ async def update_depots():
         logger.exception('Caught an exception while trying to fetch depots!')
         return
     except gevent.Timeout:  # still no idea how to solve it so just crash and restart the entire thing somewhere else
-        going_to_shutdown = True
+        going_to_shutdown = True   # todo: might've been fixed? https://github.com/ValvePython/steam/issues/474#issuecomment-2432604408
+        (config.GC_CACHE_FILE_PATH.parent / 'gevent_timeout').touch(exist_ok=True)
         logger.exception('Caught gevent.Timeout, we\'re going to shutdown...')
         return
 
