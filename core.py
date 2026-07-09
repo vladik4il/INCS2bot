@@ -25,7 +25,7 @@ from utypes import LeaderboardStats, LEADERBOARD_API_REGIONS
 execution_start_dt = dt.datetime.now()
 execution_cron = (execution_start_dt + dt.timedelta(minutes=2)).replace(second=0)
 
-CURRENT_PREMIER_SEASON = 4
+CURRENT_PREMIER_SEASON = 5
 UPDATE_CACHE_INTERVAL = 40
 MISFIRE_GRACE_TIME = 10
 
