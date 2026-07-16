@@ -31,6 +31,7 @@ idna==3.7
 iniconfig==2.0.0
 Jinja2==3.1.3
 kiwisolver==1.4.9
+Kurigram==2.2.13
 Mako==1.2.4
 MarkupSafe==2.1.3
 matplotlib==3.10.5
@@ -67,7 +68,7 @@ tzlocal==5.2
 urllib3==1.26.18
 uvloop==0.19.0; sys_platform == 'linux'
 vdf==3.4
-wsproto==1.3.2
+wsproto==1.2.0
 zope.event==5.0
 zope.interface==6.3
 zstd==1.5.7.3
