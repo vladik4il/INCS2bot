@@ -131,16 +131,6 @@ async def unique_monthly():
 @scheduler.scheduled_job('cron',
                          hour=execution_cron.hour, minute=execution_cron.minute, second=0,
                          misfire_grace_time=MISFIRE_GRACE_TIME)
-@exception_handler(message='Caught exception while gathering key price!', retry=True)
-async def check_currency():
-    new_prices = ExchangeRate.request(steam_webapi).asdict()
-
-    caching.dump_cache_changes(config.CORE_CACHE_FILE_PATH, {'key_price': new_prices})
-
-
-@scheduler.scheduled_job('cron',
-                         hour=execution_cron.hour, minute=execution_cron.minute, second=0,
-                         misfire_grace_time=MISFIRE_GRACE_TIME)
 async def fetch_leaderboard():
     # noinspection PyBroadException
     try:

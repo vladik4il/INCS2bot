@@ -59,10 +59,6 @@ class SteamWebAPI:
         return self._method('ISteamUserStats', 'GetUserStatsForGame', 2,
                             {'steamid': steamid, 'appid': appid})
 
-    def get_asset_prices(self, appid: int):
-        return self._method('ISteamEconomy', 'GetAssetPrices', 1,
-                            {'appid': appid})
-
     def get_number_of_current_players(self, appid: int):
         return self._method('ISteamUserStats', 'GetNumberOfCurrentPlayers', 1,
                             {'appid': appid})
