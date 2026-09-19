@@ -335,7 +335,7 @@ async def mainloop():
     import signal
     from signal import signal as signal_fn, SIGINT, SIGTERM, SIGABRT
 
-    signals = {k: v for v, k in signal.__dict__.items()
+    signals = {k: v for v, k in vars(signal).items()
                if v.startswith('SIG') and not v.startswith('SIG_')}
     task = None
 
