@@ -9,8 +9,8 @@ from bottypes import ExtendedIKB, ExtendedIKM
 # "Reply through logger" markup builder
 def event_log_markup_builder(user: User) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([
-        [InlineKeyboardButton(f"Reply to {f'@{user.username}' if user.username else user.first_name}",
-                              f"reply_through_logger_{user.id}")]
+        [InlineKeyboardButton(text=f"Reply to {f'@{user.username}' if user.username else user.first_name}",
+                              callback_data=f"reply_through_logger_{user.id}")]
     ])
 
 
@@ -147,9 +147,9 @@ dc_eu_markup = ExtendedIKM([
 
 # DC USA
 
-_us_east = ExtendedIKB(LK.dc_east, LK.dc_us_east)
-_us_west = ExtendedIKB(LK.dc_west, LK.dc_us_west)
-_us_south = ExtendedIKB(LK.dc_south, LK.dc_us_south)
+_us_east = ExtendedIKB(LK.dc_east, callback_data=LK.dc_us_east)
+_us_west = ExtendedIKB(LK.dc_west, callback_data=LK.dc_us_west)
+_us_south = ExtendedIKB(LK.dc_south, callback_data=LK.dc_us_south)
 
 dc_us_markup = ExtendedIKM([
     [_us_east, _us_west, _us_south],
@@ -184,16 +184,16 @@ guns_markup = ExtendedIKM([
 
 # Pistols
 
-_usps = ExtendedIKB("USP-S", "usps", translatable=False)
-_p2000 = ExtendedIKB("P2000", "p2000", translatable=False)
-_glock = ExtendedIKB("Glock-18", "glock18", translatable=False)
-_dualies = ExtendedIKB("Dual Berettas", "dualberettas", translatable=False)
-_p250 = ExtendedIKB("P250", "p250", translatable=False)
-_cz75 = ExtendedIKB("CZ75-Auto", "cz75auto", translatable=False)
-_five_seven = ExtendedIKB("Five-SeveN", "fiveseven", translatable=False)
-_tec = ExtendedIKB("Tec-9", "tec9", translatable=False)
-_deagle = ExtendedIKB("Desert Eagle", "deserteagle", translatable=False)
-_r8 = ExtendedIKB("R8 Revolver", "r8revolver", translatable=False)
+_usps = ExtendedIKB("USP-S", callback_data="usps", translatable=False)
+_p2000 = ExtendedIKB("P2000", callback_data="p2000", translatable=False)
+_glock = ExtendedIKB("Glock-18", callback_data="glock18", translatable=False)
+_dualies = ExtendedIKB("Dual Berettas", callback_data="dualberettas", translatable=False)
+_p250 = ExtendedIKB("P250", callback_data="p250", translatable=False)
+_cz75 = ExtendedIKB("CZ75-Auto", callback_data="cz75auto", translatable=False)
+_five_seven = ExtendedIKB("Five-SeveN", callback_data="fiveseven", translatable=False)
+_tec = ExtendedIKB("Tec-9", callback_data="tec9", translatable=False)
+_deagle = ExtendedIKB("Desert Eagle", callback_data="deserteagle", translatable=False)
+_r8 = ExtendedIKB("R8 Revolver", callback_data="r8revolver", translatable=False)
 
 pistols_markup = ExtendedIKM([
     [_usps, _p2000, _glock],
@@ -205,12 +205,12 @@ pistols_markup = ExtendedIKM([
 
 # Heavy
 
-_nova = ExtendedIKB("Nova", "nova", translatable=False)
-_xm1014 = ExtendedIKB("XM1014", "xm1014", translatable=False)
-_mag7 = ExtendedIKB("MAG-7", "mag7", translatable=False)
-_sawedoff = ExtendedIKB("Sawed-Off", "sawedoff", translatable=False)
-_m249 = ExtendedIKB("M249", "m249", translatable=False)
-_negev = ExtendedIKB("Negev", "negev", translatable=False)
+_nova = ExtendedIKB("Nova", callback_data="nova", translatable=False)
+_xm1014 = ExtendedIKB("XM1014", callback_data="xm1014", translatable=False)
+_mag7 = ExtendedIKB("MAG-7", callback_data="mag7", translatable=False)
+_sawedoff = ExtendedIKB("Sawed-Off", callback_data="sawedoff", translatable=False)
+_m249 = ExtendedIKB("M249", callback_data="m249", translatable=False)
+_negev = ExtendedIKB("Negev", callback_data="negev", translatable=False)
 
 heavy_markup = ExtendedIKM([
     [_nova, _xm1014],
@@ -221,13 +221,13 @@ heavy_markup = ExtendedIKM([
 
 # SMGs
 
-_mp9 = ExtendedIKB("MP9", "mp9", translatable=False)
-_mac10 = ExtendedIKB("MAC-10", "mac10", translatable=False)
-_mp7 = ExtendedIKB("MP7", "mp7", translatable=False)
-_mp5 = ExtendedIKB("MP5-SD", "mp5sd", translatable=False)
-_ump = ExtendedIKB("UMP-45", "ump45", translatable=False)
-_p90 = ExtendedIKB("P90", "p90", translatable=False)
-_pp = ExtendedIKB("PP-Bizon", "ppbizon", translatable=False)
+_mp9 = ExtendedIKB("MP9", callback_data="mp9", translatable=False)
+_mac10 = ExtendedIKB("MAC-10", callback_data="mac10", translatable=False)
+_mp7 = ExtendedIKB("MP7", callback_data="mp7", translatable=False)
+_mp5 = ExtendedIKB("MP5-SD", callback_data="mp5sd", translatable=False)
+_ump = ExtendedIKB("UMP-45", callback_data="ump45", translatable=False)
+_p90 = ExtendedIKB("P90", callback_data="p90", translatable=False)
+_pp = ExtendedIKB("PP-Bizon", callback_data="ppbizon", translatable=False)
 
 smgs_markup = ExtendedIKM([
     [_mp9, _mac10],
@@ -238,17 +238,17 @@ smgs_markup = ExtendedIKM([
 
 # Rifles
 
-_famas = ExtendedIKB("FAMAS", "famas", translatable=False)
-_galil = ExtendedIKB("Galil AR", "galilar", translatable=False)
-_m4a4 = ExtendedIKB("M4A4", "m4a4", translatable=False)
-_m4a1 = ExtendedIKB("M4A1-S", "m4a1s", translatable=False)
-_ak = ExtendedIKB("AK-47", "ak47", translatable=False)
-_aug = ExtendedIKB("AUG", "aug", translatable=False)
-_sg = ExtendedIKB("SG 553", "sg553", translatable=False)
-_ssg = ExtendedIKB("SSG 08", "ssg08", translatable=False)
-_awp = ExtendedIKB("AWP", "awp", translatable=False)
-_scar = ExtendedIKB("SCAR-20", "scar20", translatable=False)
-_g3sg1 = ExtendedIKB("G3SG1", "g3sg1", translatable=False)
+_famas = ExtendedIKB("FAMAS", callback_data="famas", translatable=False)
+_galil = ExtendedIKB("Galil AR", callback_data="galilar", translatable=False)
+_m4a4 = ExtendedIKB("M4A4", callback_data="m4a4", translatable=False)
+_m4a1 = ExtendedIKB("M4A1-S", callback_data="m4a1s", translatable=False)
+_ak = ExtendedIKB("AK-47", callback_data="ak47", translatable=False)
+_aug = ExtendedIKB("AUG", callback_data="aug", translatable=False)
+_sg = ExtendedIKB("SG 553", callback_data="sg553", translatable=False)
+_ssg = ExtendedIKB("SSG 08", callback_data="ssg08", translatable=False)
+_awp = ExtendedIKB("AWP", callback_data="awp", translatable=False)
+_scar = ExtendedIKB("SCAR-20", callback_data="scar20", translatable=False)
+_g3sg1 = ExtendedIKB("G3SG1", callback_data="g3sg1", translatable=False)
 
 rifles_markup = ExtendedIKM([
     [_famas, _galil],
@@ -281,8 +281,8 @@ leaderboard_markup = ExtendedIKM([
 
 # Crosshair
 
-_generate_crosshair = ExtendedIKB(LK.crosshair_generate, LK.crosshair_generate)
-_decode_crosshair = ExtendedIKB(LK.crosshair_decode, LK.crosshair_decode)
+_generate_crosshair = ExtendedIKB(LK.crosshair_generate, callback_data=LK.crosshair_generate)
+_decode_crosshair = ExtendedIKB(LK.crosshair_decode, callback_data=LK.crosshair_decode)
 
 crosshair_markup = ExtendedIKM([
     [_generate_crosshair, _decode_crosshair],
@@ -299,7 +299,7 @@ def get_language_settings_layout():
     language_buttons = []
     row = []
     for lang_code, lang_name in available_langs.items():
-        row.append(ExtendedIKB(lang_name, lang_code, translatable=False))
+        row.append(ExtendedIKB(lang_name, callback_data=lang_code, translatable=False))
         if len(row) >= columns:
             language_buttons.append(row)  # yes, we append lists
             row = []

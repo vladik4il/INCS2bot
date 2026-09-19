@@ -5,7 +5,7 @@ import random
 
 from pyrogram import Client, filters
 from pyrogram.enums import ChatMembersFilter
-from pyrogram.types import Chat, Message, MessageEntity, User, MessageOriginUser, MessageOriginChat, \
+from pyrogram.types import Chat, Message, User, MessageOriginUser, MessageOriginChat, \
     MessageOriginChannel, LinkPreviewOptions
 
 import config
@@ -251,41 +251,47 @@ async def echo(client: Client, message: Message):
         text = message.text.removeprefix('/echo').strip()
 
         if not text:
-            msg = await message.reply('Пустой текст.', quote=False)
+            msg = await message.reply('Пустой текст.')
             await asyncio.sleep(5)
             await msg.delete()
             return
 
         entities = correct_message_entities(message.entities, message.text, text)
-        return await reply_to.reply(text, entities=entities, quote=should_reply,
-                                    link_preview_options=LinkPreviewOptions(is_disabled=True))
+        kwargs = dict(text=text, entities=entities, link_preview_options=LinkPreviewOptions(is_disabled=True))
+        return await reply_to.reply(**kwargs) if should_reply else reply_to.answer(**kwargs)
 
     caption = message.caption.removeprefix('/echo').strip()
     entities = correct_message_entities(message.entities, message.caption, caption)
 
     if message.animation:
         animation = message.animation.file_id
-        return await reply_to.reply_animation(animation, quote=should_reply, caption=caption, caption_entities=entities)
+        kwargs = dict(animation=animation, caption=caption, caption_entities=entities)
+        return await reply_to.reply_animation(**kwargs) if should_reply else reply_to.answer_animation(**kwargs)
 
     if message.audio:
         audio = message.audio.file_id
-        return await reply_to.reply_audio(audio, quote=should_reply, caption=caption, caption_entities=entities)
+        kwargs = dict(audio=audio, caption=caption, caption_entities=entities)
+        return await reply_to.reply_audio(**kwargs) if should_reply else reply_to.answer_audio(**kwargs)
 
     if message.document:
         document = message.document.file_id
-        return await reply_to.reply_document(document, quote=should_reply, caption=caption, caption_entities=entities)
+        kwargs = dict(document=document, caption=caption, caption_entities=entities)
+        return await reply_to.reply_document(**kwargs) if should_reply else reply_to.answer_document(**kwargs)
 
     if message.photo:
         photo = message.photo.file_id
-        return await reply_to.reply_photo(photo, quote=should_reply, caption=caption, caption_entities=entities)
+        kwargs = dict(photo=photo, caption=caption, caption_entities=entities)
+        return await reply_to.reply_photo(**kwargs) if should_reply else reply_to.answer_photo(**kwargs)
 
     if message.video:
         video = message.video.file_id
-        return await reply_to.reply_video(video, quote=should_reply, caption=caption, caption_entities=entities)
+        kwargs = dict(video=video, caption=caption, caption_entities=entities)
+        return await reply_to.reply_video(**kwargs) if should_reply else reply_to.answer_video(**kwargs)
 
     if message.voice:
         voice = message.voice.file_id
-        return await reply_to.reply_voice(voice, quote=should_reply, caption=caption, caption_entities=entities)
+        kwargs = dict(voice=voice, caption=caption, caption_entities=entities)
+        return await reply_to.reply_voice(**kwargs) if should_reply else reply_to.answer_voice(**kwargs)
 
 
 @Client.on_message(filters.linked_channel & filters.chat(config.INCS2CHAT))

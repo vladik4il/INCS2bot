@@ -1,10 +1,11 @@
 from copy import deepcopy
 
+from pyrogram.enums import ButtonStyle
 from pyrogram.types import (CallbackGame,
                             InlineKeyboardButton,
                             InlineKeyboardMarkup,
                             LoginUrl,
-                            WebAppInfo)
+                            WebAppInfo, CopyTextButton, SwitchInlineQueryChosenChat, DisabledButton)
 
 from l10n import Locale
 
@@ -17,22 +18,33 @@ class ExtendedIKB(InlineKeyboardButton):
 
     def __init__(self,
                  text: str,
-                 callback_data: str | bytes = None,
-                 url: str = None,
-                 web_app: WebAppInfo = None,
-                 login_url: LoginUrl = None,
-                 user_id: int = None,
-                 switch_inline_query: str = None,
-                 switch_inline_query_current_chat: str = None,
-                 callback_game: CallbackGame = None,
                  *,
+                 icon_custom_emoji_id: str | None = None,
+                 style: ButtonStyle = ButtonStyle.DEFAULT,
+                 url: str | None = None,
+                 callback_data: str | bytes | None = None,
+                 requires_password: bool | None = None,
+                 web_app: WebAppInfo | None = None,
+                 login_url: LoginUrl | None = None,
+                 user_id: int | None = None,
+                 switch_inline_query: str | None = None,
+                 switch_inline_query_current_chat: str | None = None,
+                 switch_inline_query_chosen_chat: SwitchInlineQueryChosenChat | None = None,
+                 copy_text: CopyTextButton | None = None,
+                 callback_game: CallbackGame | None = None,
+                 pay: bool | None = None,
+                 disabled: DisabledButton | None = None,
                  translatable: bool = True,
                  selectable: bool = True):
         if callback_data is None and url is None:
             callback_data = text
 
-        super().__init__(text, callback_data, url, web_app, login_url, user_id,
-                         switch_inline_query, switch_inline_query_current_chat, callback_game)
+        super().__init__(text=text, icon_custom_emoji_id=icon_custom_emoji_id, url=url, style=style,
+                         callback_data=callback_data, requires_password=requires_password, web_app=web_app,
+                         login_url=login_url, user_id=user_id,  switch_inline_query=switch_inline_query,
+                         switch_inline_query_current_chat=switch_inline_query_current_chat,
+                         switch_inline_query_chosen_chat=switch_inline_query_chosen_chat, copy_text=copy_text,
+                         callback_game=callback_game, pay=pay, disabled=disabled)
         self.translatable = translatable
         self.selectable = selectable
 

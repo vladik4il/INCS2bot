@@ -376,7 +376,7 @@ async def user_profile_info_process(client: BotClient, session: UserSession, bot
         await user_input.delete()
         return await profile_info(client, session, bot_message)
 
-    info_message = await user_input.reply(session.locale.bot_loading)
+    info_message = await user_input.answer(session.locale.bot_loading)
     await client.send_chat_action(bot_message.chat.id, ChatAction.TYPING)
 
     try:
@@ -425,7 +425,7 @@ async def user_profile_info_process(client: BotClient, session: UserSession, bot
     text = session.locale.user_profileinfo_text.format(*info.to_tuple())
 
     await info_message.edit(text, link_preview_options=LinkPreviewOptions(is_disabled=True))
-    return await user_input.reply(session.locale.bot_loading)
+    return await user_input.answer(session.locale.bot_loading)
 
 
 @bot.navmenu(LK.user_gamestats_button_title, came_from=profile_info, ignore_message_not_modified=True)
@@ -474,8 +474,8 @@ async def user_game_stats_process(client: BotClient, session: UserSession, bot_m
                             switch_inline_query=telegraph_response['url'])
     markup_share = ExtendedIKM([[share_btn]])
 
-    await user_input.reply(telegraph_response['url'], reply_markup=markup_share)
-    return await user_input.reply(session.locale.bot_loading)
+    await user_input.answer(telegraph_response['url'], reply_markup=markup_share)
+    return await user_input.answer(session.locale.bot_loading)
 
 
 async def user_info_handle_error(_, session: UserSession, user_input: Message, exc: ParseUserStatsError):
@@ -542,8 +542,8 @@ async def decode_crosshair_process(client: BotClient, session: UserSession, bot_
 
     text = session.locale.crosshair_decode_result.format('; '.join(_crosshair.cs2_commands))
 
-    await user_input.reply(text)
-    return await user_input.reply(session.locale.bot_loading)
+    await user_input.answer(text)
+    return await user_input.answer(session.locale.bot_loading)
 
 
 @bot.funcmenu(LK.exchangerate_button_title, came_from=extra_features, ignore_message_not_modified=True)
@@ -886,7 +886,7 @@ async def welcome(client: BotClient, session: UserSession, message: Message):
     text = session.locale.bot_start_text.format(message.from_user.first_name)
 
     session.current_menu_id = main_menu.id
-    return await message.reply(text, reply_markup=keyboards.main_markup(session.locale))
+    return await message.answer(text, reply_markup=keyboards.main_markup(session.locale))
 
 
 # cat: Reply through logger
@@ -908,10 +908,10 @@ async def reply_through_logger_command(client: BotClient, message: Message):
         recipient = await client.get_users(recipient_id)
         recipient_pm_chat = await client.get_chat(recipient.id)
     except PeerIdInvalid:
-        await message.reply("You can't send messages to this user (perhaps, they haven't interacted with the bot yet).")
+        await message.answer("You can't send messages to this user (perhaps, they haven't interacted with the bot yet).")
         session.current_menu_id = main_menu.id
-        return await message.reply(session.locale.bot_choose_cmd,
-                                   reply_markup=keyboards.main_markup(session.locale))
+        return await message.answer(session.locale.bot_choose_cmd,
+                                    reply_markup=keyboards.main_markup(session.locale))
 
     formatted_username = f'@{recipient.username}' if recipient.username else recipient.first_name
     await client.send_message(recipient_pm_chat.id, f'You have received a new message from the developers!:\n'
@@ -921,10 +921,10 @@ async def reply_through_logger_command(client: BotClient, message: Message):
                      f'\n'
                      f'<blockquote>{message_to_send}</blockquote>', instant=True)
 
-    await message.reply('Successfully sent the message.')
+    await message.answer('Successfully sent the message.')
     session.current_menu_id = main_menu.id
-    return await message.reply(session.locale.bot_choose_cmd,
-                               reply_markup=keyboards.main_markup(session.locale))
+    return await message.answer(session.locale.bot_choose_cmd,
+                                reply_markup=keyboards.main_markup(session.locale))
 
 
 async def reply_through_logger_callback(client: BotClient, session: UserSession,
@@ -943,8 +943,8 @@ async def reply_through_logger_callback(client: BotClient, session: UserSession,
     except PeerIdInvalid:
         await e.edit("You can't send messages to this user (perhaps, they blocked the bot).")
         session.current_menu_id = main_menu.id
-        return await e.reply(session.locale.bot_choose_cmd,
-                             reply_markup=keyboards.main_markup(session.locale))
+        return await e.answer(session.locale.bot_choose_cmd,
+                              reply_markup=keyboards.main_markup(session.locale))
 
     formatted_username = f'@{recipient.username}' if recipient.username else recipient.first_name
     try:
@@ -956,18 +956,18 @@ async def reply_through_logger_callback(client: BotClient, session: UserSession,
             timeout=ASK_TIMEOUT
         )
     except asyncio.exceptions.TimeoutError:
-        await e.reply('Timed out.')
+        await e.answer('Timed out.')
 
         session.current_menu_id = main_menu.id
-        return await e.reply(session.locale.bot_choose_cmd,
-                             reply_markup=keyboards.main_markup(session.locale))
+        return await e.answer(session.locale.bot_choose_cmd,
+                              reply_markup=keyboards.main_markup(session.locale))
 
     if message_to_send.text == '/cancel':
-        await e.reply('Cancelled.')
+        await e.answer('Cancelled.')
 
         session.current_menu_id = main_menu.id
-        return await e.reply(session.locale.bot_choose_cmd,
-                             reply_markup=keyboards.main_markup(session.locale))
+        return await e.answer(session.locale.bot_choose_cmd,
+                              reply_markup=keyboards.main_markup(session.locale))
 
     await client.send_message(recipient_pm_chat.id, f'You have received a new message from the developers!\n'
                                                     f'\n'
@@ -976,10 +976,10 @@ async def reply_through_logger_callback(client: BotClient, session: UserSession,
                      f'\n'
                      f'<blockquote>{message_to_send.text}</blockquote>', instant=True)
 
-    await message_to_send.reply('Successfully sent the message.')
+    await message_to_send.answer('Successfully sent the message.')
     session.current_menu_id = main_menu.id
-    return await message_to_send.reply(session.locale.bot_choose_cmd,
-                                       reply_markup=keyboards.main_markup(session.locale))
+    return await message_to_send.answer(session.locale.bot_choose_cmd,
+                                        reply_markup=keyboards.main_markup(session.locale))
 
 
 # cat: Service
@@ -1070,4 +1070,5 @@ async def main():
 
 
 if __name__ == '__main__':
-    asyncio.get_event_loop().run_until_complete(main())  # asyncio.run(main()) throws a bunch of errors
+    # why not `asyncio.run`? short answer: https://pastebin.com/qTECqGwq
+    asyncio.get_event_loop().run_until_complete(main())
