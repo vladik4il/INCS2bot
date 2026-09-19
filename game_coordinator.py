@@ -364,8 +364,10 @@ async def terminate_all_connections():
         logger.info('Logout...')
         client.logout()
     await bot.stop()
-    async_scheduler.shutdown()
-    gevent_scheduler.shutdown()
+    if async_scheduler.running:
+        async_scheduler.shutdown()
+    if gevent_scheduler.running:
+        gevent_scheduler.shutdown()
     logger.info('Terminated.')
 
 
