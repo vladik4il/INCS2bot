@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import NamedTuple, Protocol, runtime_checkable
+from typing import NamedTuple, Protocol, runtime_checkable, TypedDict
 
 from .states import State, States
 
@@ -11,7 +11,12 @@ __all__ = ('Datacenter', 'DatacenterRegion', 'DatacenterGroup',
            'DatacenterVariation', 'DatacenterStateVariation')
 
 
-UNKNOWN_DC_STATE = {'capacity': States.UNKNOWN.literal, 'load': States.UNKNOWN.literal}
+class DatacenterStateMapped(TypedDict):
+    capacity: str
+    load: str
+
+
+UNKNOWN_DC_STATE = DatacenterStateMapped(capacity=States.UNKNOWN.literal, load=States.UNKNOWN.literal)
 
 
 @runtime_checkable
@@ -21,7 +26,7 @@ class DatacenterVariation(Protocol):
     def cached_state(self, cache: dict[str, ...]) -> DatacenterStateVariation:
         ...
 
-    def remap(self, data: dict[str, dict[str, str]]) -> dict[str, str]:
+    def remap(self, data: dict[str, DatacenterStateMapped]) -> DatacenterStateMapped:
         ...
 
 
@@ -32,14 +37,14 @@ class Datacenter(NamedTuple):
     l10n_key_name: str = ''
     l10n_key_title: str = ''
 
-    def cached_state(self, cache: dict[str, ...]) -> DatacenterState:
+    def cached_state(self, cache: dict[str, DatacenterStateMapped]) -> DatacenterState:
         dc_data = cache[self.id]
         capacity = States.get(dc_data['capacity'])
         load = States.get(dc_data['load'])
 
         return DatacenterState(self, capacity, load)
 
-    def remap(self, data: dict[str, dict[str, str]]):
+    def remap(self, data: dict[str, DatacenterStateMapped]):
         return data.get(self.associated_api_id, UNKNOWN_DC_STATE)
 
 
@@ -56,7 +61,7 @@ class DatacenterRegion(NamedTuple):
 
         return DatacenterRegionState(self, states)
 
-    def remap(self, data: dict[str, dict[str, str]]):
+    def remap(self, data: dict[str, DatacenterStateMapped]):
         return {dc.id: dc.remap(data) for dc in self.datacenters}
 
 
@@ -71,7 +76,7 @@ class DatacenterGroup(NamedTuple):
 
         return DatacenterGroupState(self, region_states)
 
-    def remap(self, data: dict[str, dict[str, str]]):
+    def remap(self, data: dict[str, DatacenterStateMapped]):
         return {region.id: region.remap(data) for region in self.regions}
 
 
