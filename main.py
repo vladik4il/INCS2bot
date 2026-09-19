@@ -904,7 +904,8 @@ async def reply_through_logger_command(client: BotClient, message: Message):
     if session is None:
         session = await client.register_user_session(sender, message)
 
-    _, recipient_id, message_to_send = message.text.split(maxsplit=2)
+    _, recipient_id, *text = (message.text or message.caption).split(maxsplit=2)
+    text = text[0] if text else ""
 
     try:
         recipient = await client.get_users(recipient_id)
