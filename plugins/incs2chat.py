@@ -9,6 +9,7 @@ from pyrogram.types import Chat, Message, User, MessageOriginUser, MessageOrigin
     MessageOriginChannel, LinkPreviewOptions
 
 import config
+from functions.telegram import correct_message_entities
 
 
 MESSAGE_FILTERS_FILE = config.DATA_FOLDER / 'filtered.json'
@@ -52,28 +53,6 @@ async def is_administrator(chat: Chat, user: User) -> bool:
     admins = {admin.user.id async for admin in chat.get_members(filter=ChatMembersFilter.ADMINISTRATORS)}
 
     return user.id in admins
-
-
-def correct_message_entities(entities: list[MessageEntity] | None,
-                             original_text: str, new_text: str) -> list[MessageEntity] | None:
-    """Correct message entities (a.k.a. Markdown formatting) for edited text."""
-
-    if entities is None:
-        return
-
-    length_diff = len(original_text) - len(new_text)
-
-    entities_i_to_remove = []
-    for i, entity in enumerate(entities):
-        entity.offset -= length_diff
-
-        if entity.offset < 0:
-            entities_i_to_remove.append(i)
-
-    for i in reversed(entities_i_to_remove):
-        entities.pop(i)
-
-    return entities
 
 
 async def cs_l10n_update(message: Message):

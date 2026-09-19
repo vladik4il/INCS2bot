@@ -13,7 +13,9 @@ from csxhair import Crosshair
 from pyrogram import filters
 from pyrogram.enums import ChatType, ChatAction, ParseMode
 from pyrogram.errors import MessageDeleteForbidden, MessageNotModified, PeerIdInvalid
-from pyrogram.types import CallbackQuery, Message, LinkPreviewOptions
+from pyrogram.types import (CallbackQuery, Message, LinkPreviewOptions, InputMediaAudio,
+                            InputMediaDocument, InputMediaPhoto, InputMediaVideo, InputMediaAnimation,
+                            InputMediaVoiceNote)
 # noinspection PyUnresolvedReferences
 from pyropatch import pyropatch  # do not remove this!!
 from telegraph.aio import Telegraph
@@ -26,6 +28,7 @@ from db import db_session
 from functions import caching, info_formatters, utime
 from functions.decorators import ignore_message_not_modified
 from functions.locale import get_available_languages
+from functions.telegram import correct_message_entities
 from functions.ulogging import *
 import keyboards
 # noinspection PyPep8Naming
@@ -914,12 +917,50 @@ async def reply_through_logger_command(client: BotClient, message: Message):
                                     reply_markup=keyboards.main_markup(session.locale))
 
     formatted_username = f'@{recipient.username}' if recipient.username else recipient.first_name
-    await client.send_message(recipient_pm_chat.id, f'You have received a new message from the developers!:\n'
-                                                    f'\n'
-                                                    f'<blockquote>{message_to_send}</blockquote>')
+
+    media = []
+    if message.media:
+        media_types = {
+            "audio": InputMediaAudio,
+            "document": InputMediaDocument,
+            "photo": InputMediaPhoto,
+            "video": InputMediaVideo,
+            "animation": InputMediaAnimation,
+        }
+        media_group = await message.get_media_group() if message.media_group_id else [message]
+        for message in media_group:
+            for media_type in media_types:
+                file = getattr(message, media_type, None)
+                if file:
+                    text = text or ''
+                    caption = f'You have received a new message from the developers!' + \
+                             (f'\n\n'
+                              f'<blockquote>{text}</blockquote>' if text else '')
+                    entities = correct_message_entities(message.caption_entities[2:]
+                                                        if message.caption_entities else None, text, caption)
+                    if media:  # the simplest way to check if it's not the first media object
+                        caption = ""
+                        entities = None
+
+                    media.append(
+                        media_types[media_type](media=file.file_id,
+                                                caption=caption,
+                                                caption_entities=entities)
+                    )
+        if len(media) == 1 and isinstance(media[0], InputMediaAnimation):
+            await client.send_animation(recipient_pm_chat.id, media[0].media, caption=media[0].caption,
+                                        show_caption_above_media=True)
+        else:
+            await client.send_media_group(recipient_pm_chat.id, media, show_caption_above_media=True)
+    else:
+        await client.send_message(recipient_pm_chat.id, f'You have received a new message from the developers!:\n'
+                                                        f'\n'
+                                                        f'<blockquote>{text}</blockquote>')
+    n_attachments = f' *({len(media)} attachments)*' if media else ''
+    # todo: attachments support for the bot logger
     await client.log(f'Sent a message to {formatted_username}\n'
                      f'\n'
-                     f'<blockquote>{message_to_send}</blockquote>', instant=True)
+                     f'<blockquote>{text or ""}{n_attachments}</blockquote>', instant=True)
 
     await message.answer('Successfully sent the message.')
     session.current_menu_id = main_menu.id
@@ -969,12 +1010,46 @@ async def reply_through_logger_callback(client: BotClient, session: UserSession,
         return await e.answer(session.locale.bot_choose_cmd,
                               reply_markup=keyboards.main_markup(session.locale))
 
-    await client.send_message(recipient_pm_chat.id, f'You have received a new message from the developers!\n'
-                                                    f'\n'
-                                                    f'<blockquote>{message_to_send.text}</blockquote>')
+    media = []
+    if message_to_send.media:
+        media_types = {
+            "audio": InputMediaAudio,
+            "document": InputMediaDocument,
+            "photo": InputMediaPhoto,
+            "video": InputMediaVideo,
+            "animation": InputMediaAnimation,
+            "voice": InputMediaVoiceNote
+        }
+        media_group = await message_to_send.get_media_group() if message_to_send.media_group_id else [message_to_send]
+        for message in media_group:
+            for media_type in media_types:
+                file = getattr(message, media_type, None)
+                if file:
+                    text = message_to_send.caption or ''
+                    caption = f'You have received a new message from the developers!' + \
+                             (f'\n\n'
+                              f'<blockquote>{text}</blockquote>' if text else '')
+                    entities = correct_message_entities(message.caption_entities, text, caption)
+                    if media:
+                        caption = ""
+                        entities = None
+                    media.append(
+                        media_types[media_type](media=file.file_id,
+                                                caption=caption,
+                                                caption_entities=entities)
+                    )
+        if len(media) == 1 and isinstance(media[0], InputMediaAnimation):
+            await client.send_animation(recipient_pm_chat.id, media[0], show_caption_above_media=True)
+        else:
+            await client.send_media_group(recipient_pm_chat.id, media, show_caption_above_media=True)
+    else:
+        await client.send_message(recipient_pm_chat.id, f'You have received a new message from the developers!\n'
+                                                        f'\n'
+                                                        f'<blockquote>{message_to_send.text}</blockquote>')
+    n_attachments = f'*({len(media)} attachments)*' if media else ''
     await client.log(f'Sent a message to {formatted_username}\n'
                      f'\n'
-                     f'<blockquote>{message_to_send.text}</blockquote>', instant=True)
+                     f'<blockquote>{message_to_send.text}{n_attachments}</blockquote>', instant=True)
 
     await message_to_send.answer('Successfully sent the message.')
     session.current_menu_id = main_menu.id
