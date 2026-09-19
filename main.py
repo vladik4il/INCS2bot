@@ -592,9 +592,8 @@ async def send_game_version(_, session: UserSession, bot_message: Message):
 
 @bot.navmenu(LK.game_leaderboard_button_title, came_from=extra_features, ignore_message_not_modified=True)
 async def game_leaderboard(_, session: UserSession, bot_message: Message):
-    # todo: make it so we don't have to set it manually here
     # noinspection PyTypeChecker
-    leaderboard_cache: LeaderboardCache = caching.load_cache(config.LEADERBOARD_SEASON3_CACHE_FILE_PATH)
+    leaderboard_cache: LeaderboardCache = caching.load_cache(config.LEADERBOARD_SEASON_CACHE_FILE_PATH)
 
     keyboards.leaderboard_markup.select_button_by_key(LK.game_leaderboard_world)
 
@@ -655,7 +654,7 @@ async def send_game_leaderboard(_, session: UserSession, bot_message: Message,
                            reply_markup=keyboards.leaderboard_markup(session.locale))
 
     # noinspection PyTypeChecker
-    lb_cache: LeaderboardCache = caching.load_cache(config.LEADERBOARD_SEASON3_CACHE_FILE_PATH)  # todo: and here!
+    lb_cache: LeaderboardCache = caching.load_cache(config.LEADERBOARD_SEASON_CACHE_FILE_PATH)
 
     region = region.split('_')[-1]
     if region == 'world':
