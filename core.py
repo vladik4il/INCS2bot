@@ -19,7 +19,7 @@ from dcatlas import DatacenterAtlas
 from functions import caching, utime
 from functions.ulogging import *
 from l10n import locale
-from utypes import GameServers, State, SteamWebAPI
+from utypes import GameServers, State, SteamWebAPI, ExchangeRate
 from utypes import LeaderboardStats, LEADERBOARD_API_REGIONS
 
 execution_start_dt = dt.datetime.now()
@@ -126,6 +126,20 @@ async def unique_monthly():
         cache['monthly_unique_players'] = new_player_count
 
     caching.dump_cache(config.CORE_CACHE_FILE_PATH, cache)
+
+
+@scheduler.scheduled_job('cron',
+                         hour=execution_cron.hour, minute=execution_cron.minute, second=0,
+                         misfire_grace_time=MISFIRE_GRACE_TIME)
+@exception_handler(message='Caught exception while gathering key price!', retry=True)
+async def check_currency():
+    try:
+        new_prices = ExchangeRate.request(steam_webapi).asdict()
+    except Exception as e:
+        return
+
+    logger.info(f'they fixed the GetAssetPrices! {new_prices=}')
+    caching.dump_cache_changes(config.CORE_CACHE_FILE_PATH, {'key_price': new_prices})
 
 
 @scheduler.scheduled_job('cron',
