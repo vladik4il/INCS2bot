@@ -4,7 +4,7 @@ APScheduler==3.11.3
 Babel==2.18.0
 betterproto==2.0.0b6
 csgo @ git+https://github.com/SyberiaK/csgo.git@ec2b3a3b3971ec066b584524cefb57377ab818dc
-csxhair==2.0.0
+csxhair==2.0.1
 filelock==3.32.7
 httpx==0.28.1
 Jinja2==3.1.6
