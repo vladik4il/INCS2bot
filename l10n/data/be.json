@@ -32,7 +32,7 @@
     "crosshair": "Прыцэл",
     "crosshair_generate": "Стварыць",
     "crosshair_decode": "Расшыфраваць",
-    "crosshair_decode_example": "📖 Калі ласка, увядзіце код прыцэла, які жадаеце расшыфраваць (напр.: `CSGO-O4Jsi-V36wY-rTMGK-9w7qF-jQ8WB`).",
+    "crosshair_decode_example": "📖 Калі ласка, увядзіце код прыцэла, які жадаеце расшыфраваць (напр.: `CSjNcfcGjo8LLy2pDpCynr5e5efCGW6yXuf7B6aQ7wkWmU`).",
     "crosshair_decode_error": "⚠️ Няверны код, калі ласка, паспрабуйце яшчэ раз.",
     "crosshair_decode_result": [
         "🧬 Расшыфраваныя параметры дадзенага кода прыцэла:",

@@ -30,7 +30,7 @@
     "crosshair": "Прицел",
     "crosshair_generate": "Создать",
     "crosshair_decode": "Расшифровать",
-    "crosshair_decode_example": "📖 Пожалуйста, введите код прицела, который желаете расшифровать (напр.: `CSGO-O4Jsi-V36wY-rTMGK-9w7qF-jQ8WB`).",
+    "crosshair_decode_example": "📖 Пожалуйста, введите код прицела, который желаете расшифровать (напр.: `CSjNcfcGjo8LLy2pDpCynr5e5efCGW6yXuf7B6aQ7wkWmU`).",
     "crosshair_decode_error": "⚠️ Неверный код, пожалуйста, попробуйте ещё раз.",
     "crosshair_decode_result": [
         "🧬 Расшифрованные параметры данного кода прицела:",

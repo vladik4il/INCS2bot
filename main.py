@@ -543,7 +543,7 @@ async def decode_crosshair_process(client: BotClient, session: UserSession, bot_
         await user_input.delete()
         return await decode_crosshair(client, session, bot_message, last_error=session.locale.crosshair_decode_error)
 
-    text = session.locale.crosshair_decode_result.format('; '.join(_crosshair.cs2_commands))
+    text = session.locale.crosshair_decode_result.format('; '.join(_crosshair.convars))
 
     await user_input.answer(text)
     return await user_input.answer(session.locale.bot_loading)

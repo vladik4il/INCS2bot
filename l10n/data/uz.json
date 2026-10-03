@@ -30,7 +30,7 @@
     "crosshair": "Prisel",
     "crosshair_generate": "Yarating",
     "crosshair_decode": "Rashifrovka",
-    "crosshair_decode_example": "📖 Iltimos, rashifrini ochmoqchi bo'lgan o'zaro faoliyat kodni kiriting (masalan: `CSGO-O4Jsi-V36wY-rTMGK-9w7qF-jQ8WB`).",
+    "crosshair_decode_example": "📖 Iltimos, rashifrini ochmoqchi bo'lgan o'zaro faoliyat kodni kiriting (masalan: `CSjNcfcGjo8LLy2pDpCynr5e5efCGW6yXuf7B6aQ7wkWmU`).",
     "crosshair_decode_error": "⚠️ Kod noto‘g‘ri, qayta urinib ko‘ring.",
     "crosshair_decode_result": [
         "🧬 Ushbu Prisel kodining rashifrlangan parametrlari:",

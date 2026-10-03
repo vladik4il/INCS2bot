@@ -30,7 +30,7 @@
     "crosshair": "Mirino",
     "crosshair_generate": "Genera",
     "crosshair_decode": "Decodifica",
-    "crosshair_decode_example": "📖 Per favore, inserisci il codice del mirino che vorresti decodificare (es: `CSGO-O4Jsi-V36wY-rTMGK-9w7qF-jQ8WB`).",
+    "crosshair_decode_example": "📖 Per favore, inserisci il codice del mirino che vorresti decodificare (es: `CSjNcfcGjo8LLy2pDpCynr5e5efCGW6yXuf7B6aQ7wkWmU`).",
     "crosshair_decode_error": "⚠️ Codice invalido, per favore , prova di nuovo.",
     "crosshair_decode_result": [
         "🧬 Parametri decodificati per il codice del mirino fornito:",

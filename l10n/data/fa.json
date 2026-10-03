@@ -30,7 +30,7 @@
     "crosshair": "نشانه",
     "crosshair_generate": "تولید",
     "crosshair_decode": "رمزگشایی",
-    "crosshair_decode_example": "📖 .لطفا کد نشانه خود را وارد کنید (مثال: `CSGO-O4Jsi-V36wY-rTMGK-9w7qF-jQ8WB`).",
+    "crosshair_decode_example": "📖 .لطفا کد نشانه خود را وارد کنید (مثال: `CSjNcfcGjo8LLy2pDpCynr5e5efCGW6yXuf7B6aQ7wkWmU`).",
     "crosshair_decode_error": "⚠️. نامعتبر،دوباره تلاش کنید",
     "crosshair_decode_result": [
         "🧬 نشانه رمز گشایی شده:",
