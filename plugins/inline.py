@@ -15,7 +15,7 @@ from dcatlas import DatacenterAtlas
 from functions import info_formatters, caching
 import keyboards
 from l10n import load_tags
-from utypes import (DatacenterInlineResult, ExchangeRate,
+from utypes import (DatacenterInlineResult,
                     GameServers, GameVersion,
                     drop_cap_reset_timer)
 
@@ -103,8 +103,6 @@ async def sync_user_data_inline(client: BotClient, inline_query: InlineQuery):
     # if-chain because it's a plugin
     if is_user_stats_page(inline_query):
         return await share_inline(client, session, inline_query)
-    if query.startswith('price'):
-        return await inline_exchange_rate(client, session, inline_query)
     if query.startswith('dc'):
         return await inline_datacenters(client, session, inline_query)
     return await default_inline(client, session, inline_query)
@@ -115,59 +113,6 @@ async def share_inline(_, session: UserSession, inline_query: InlineQuery):
                                  InputTextMessageContent(inline_query.query),
                                  description=inline_query.query)
     await inline_query.answer([r], cache_time=10)
-
-
-@log_exception_inline
-async def inline_exchange_rate(_, session: UserSession, inline_query: InlineQuery):
-    core_cache = caching.load_cache(config.CORE_CACHE_FILE_PATH)
-    data = ExchangeRate.cached_data(core_cache).asdict()
-
-    try:
-        query = inline_query.query.split()[1].lower()
-    except IndexError:
-        result = [
-            InlineQueryResultArticle(
-                session.locale.exchangerate_inline_title,
-                InputTextMessageContent(session.locale.exchangerate_inline_text_default),
-                description=session.locale.exchangerate_inline_description,
-            )
-        ]
-        return await inline_query.answer(result, cache_time=10)
-
-    results = []
-    currencies = []
-    for k, v in TAGS.currencies_to_dict().items():
-        if any(query in tag for tag in v):
-            currencies.append(k)
-
-    if not currencies:
-        currency_available = (session.locale.currencies_tags.format(k.upper(),
-                                                                    session.locale.get(f'currencies_{k}'),
-                                                                    ', '.join(v - {k}))
-                              for k, v in TAGS.currencies_to_dict().items())
-
-        results.append(
-            InlineQueryResultArticle(
-                session.locale.exchangerate_inline_title_notfound,
-                InputTextMessageContent('\n'.join(currency_available)),
-                description=session.locale.exchangerate_inline_description_notfound,
-            )
-        )
-        return await inline_query.answer(results, cache_time=5)
-
-    for i, currency in enumerate(currencies):
-        value = data[currency.upper()]
-        symbol = ExchangeRate.CURRENCIES_SYMBOLS[currency.upper()]
-        results.append(
-            InlineQueryResultArticle(
-                session.locale.exchangerate_inline_title_selected.format(symbol),
-                InputTextMessageContent(session.locale.exchangerate_inline_text_selected.format(value, symbol)),
-                f'{i}',
-                description=session.locale.exchangerate_inline_description_selected.format(value, symbol)
-            )
-        )
-
-    await inline_query.answer(results, cache_time=10)
 
 
 @log_exception_inline
