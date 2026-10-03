@@ -33,7 +33,7 @@ from functions.ulogging import *
 import keyboards
 # noinspection PyPep8Naming
 from l10n import LocaleKeys as LK, locale as lc
-from utypes import (DatacenterVariation, ExchangeRate,
+from utypes import (DatacenterVariation,
                     GameServers, GameVersion, LeaderboardStats,
                     ProfileInfo,
                     States, UserGameStats, drop_cap_reset_timer, LeaderboardCache)
@@ -547,16 +547,6 @@ async def decode_crosshair_process(client: BotClient, session: UserSession, bot_
 
     await user_input.answer(text)
     return await user_input.answer(session.locale.bot_loading)
-
-
-@bot.funcmenu(LK.exchangerate_button_title, came_from=extra_features, ignore_message_not_modified=True)
-async def send_exchange_rate(_, session: UserSession, bot_message: Message):
-    core_cache = caching.load_cache(config.CORE_CACHE_FILE_PATH)
-
-    prices = ExchangeRate.cached_data(core_cache).asdict()
-
-    await bot_message.edit(session.locale.exchangerate_text.format(*prices.values()),
-                           reply_markup=keyboards.extra_markup(session.locale))
 
 
 @bot.funcmenu(LK.valve_hqtime_button_title, came_from=extra_features, ignore_message_not_modified=True)

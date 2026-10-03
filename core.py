@@ -19,7 +19,7 @@ from dcatlas import DatacenterAtlas
 from functions import caching, utime
 from functions.ulogging import *
 from l10n import locale
-from utypes import ExchangeRate, GameServers, State, SteamWebAPI
+from utypes import GameServers, State, SteamWebAPI
 from utypes import LeaderboardStats, LEADERBOARD_API_REGIONS
 
 execution_start_dt = dt.datetime.now()
