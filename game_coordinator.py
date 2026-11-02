@@ -193,9 +193,7 @@ async def update_depots():
             # I am an idiot but oh well
             await send_branch_alert('<null>', key, new_value)
 
-    cache.update(new_data)
-
-    caching.dump_cache(config.GC_CACHE_FILE_PATH, cache)
+    caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, new_data)
 
     logger.info('Successfully dumped game version data.')
 
@@ -244,14 +242,19 @@ async def check_for_branches_updates(cache: dict, cached_branches: dict, current
             continue
 
         if branch_name == 'public':
-            game_version_data = await get_game_version_loop(cache.get('cs2_client_version'))
-            cache.update(game_version_data.asdict())
-            event = 'public_branch_updated'
+            asyncio.create_task(handle_public_branch_update(cache.get('cs2_client_version'), new_buildid))
+            continue
         elif is_backup_branch(branch_name):
             event = 'backup_branch_updated_sync' if branch_name == cs2_patch_version else 'backup_branch_updated'
         else:
             event = 'misc_branch_updated'
         await send_branch_alert(branch_name, event, new_buildid)
+
+
+async def handle_public_branch_update(client_version: int | None, new_buildid: str | None):
+    game_version_data = await get_game_version_loop(client_version)
+    caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, game_version_data.asdict())
+    await send_branch_alert('public', 'public_branch_updated', new_buildid)
 
 
 async def get_game_version_loop(cached_client_version: int | None) -> GameVersionData:
