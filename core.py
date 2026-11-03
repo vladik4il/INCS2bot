@@ -135,8 +135,8 @@ async def unique_monthly():
 async def check_currency():
     try:
         new_prices = ExchangeRate.request(steam_webapi).asdict()
-    except Exception:
-        logger.exception(f"Couldn't parse exchange rate.")
+    except requests.exceptions.JSONDecodeError:
+        logger.warning(f"Couldn't parse exchange rate. The method is still unavailable.")
         return
 
     logger.info(f'they fixed the GetAssetPrices! {new_prices=}')
@@ -160,9 +160,8 @@ async def fetch_leaderboard():
             new_data[f'regional_leaderboard_stats_{region}'] = regional_leaderboard_stats
 
         caching.dump_cache_changes(config.LEADERBOARD_SEASON_CACHE_FILE_PATH, new_data)
-    except requests.exceptions.JSONDecodeError as e:
-        logger.warning(f"Couldn't parse world leaderboard stats.",
-                      f" Probably closed.")
+    except requests.exceptions.JSONDecodeError:
+        logger.warning(f"Couldn't parse world leaderboard stats. They're still closed.")
 
 
 @exception_handler(message='Caught exception while alerting player count all-time peak!', retry=True)
