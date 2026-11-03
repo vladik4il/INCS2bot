@@ -47,6 +47,24 @@ MISFIRE_GRACE_TIME = 10
 setup_logging(config.LOGS_CONFIG_FILE_PATH)
 logger = get_logger(f'{config.NAME}.gc')
 
+shutdown_event = asyncio.Event()
+exit_code = 0
+background_tasks: set[asyncio.Task] = set()
+
+
+def _task_done(task: asyncio.Task):
+    background_tasks.discard(task)
+    if not task.cancelled() and task.exception():
+        logger.error('Background task failed', exc_info=task.exception())
+
+
+def spawn(coro) -> asyncio.Task:
+    task = asyncio.create_task(coro)
+    background_tasks.add(task)
+    task.add_done_callback(_task_done)
+    return task
+
+
 class PatchedSteamClient(SteamClient):
     """Fixes an infinite program blocking when unable to connect to CM."""
 
@@ -83,8 +101,6 @@ cs = CSGOClient(client)
 gevent_scheduler = GeventScheduler()
 async_scheduler = AsyncIOScheduler()
 
-going_to_shutdown = False  # can be used in jobs to safely call sys.exit() afterwards
-
 
 def is_backup_branch(name: str) -> bool:
     return name.startswith('1.4') or name.startswith('1.3')
@@ -115,25 +131,24 @@ def handle_reconnect(delay):
 
 @client.on(SteamClient.EVENT_DISCONNECTED)
 def handle_disconnect():
-    logger.warning('Disconnected.')
+    if shutdown_event.is_set():
+        return
 
-    logger.info('Reconnecting...')
-    success = client.reconnect(maxdelay=30)
-
-    if not success:
+    logger.warning('Disconnected. Reconnecting...')
+    if not client.reconnect(maxdelay=30):
         logger.warning('Failed to reconnect, shutting down the script.')
-        loop = asyncio.get_running_loop()
-        loop.create_task(terminate_all_connections())
-        sys.exit()
-
+        request_shutdown(1)
+        return
     logger.info('Reconnected successfully.')
 
 
 @client.on(SteamClient.EVENT_LOGGED_ON)
 def handle_after_logon():
     cs.launch()
-    async_scheduler.start()
-    gevent_scheduler.start()
+    if not async_scheduler.running:
+        async_scheduler.start()
+    if not gevent_scheduler.running:
+        gevent_scheduler.start()
 
 
 @cs.on(CSGOClient.EVENT_READY)
@@ -167,8 +182,8 @@ async def update_depots():
         logger.exception('Caught an exception while trying to fetch depots!')
         return
     except gevent.Timeout:  # no idea how to solve it so just shutdown and restart the entire thing somewhere else
-        going_to_shutdown = True
         logger.exception('Caught gevent.Timeout, we\'re going to shutdown...')
+        request_shutdown(1)
         return
 
     cache = caching.load_cache(config.GC_CACHE_FILE_PATH)
@@ -242,7 +257,7 @@ async def check_for_branches_updates(cache: dict, cached_branches: dict, current
             continue
 
         if branch_name == 'public':
-            asyncio.create_task(handle_public_branch_update(cache.get('cs2_client_version'), new_buildid))
+            spawn(handle_public_branch_update(cache.get('cs2_client_version'), new_buildid))
             continue
         elif is_backup_branch(branch_name):
             event = 'backup_branch_updated_sync' if branch_name == cs2_patch_version else 'backup_branch_updated'
@@ -331,44 +346,55 @@ async def send_text_alert(text: str):
             await msg.pin(disable_notification=True)
 
 
+def request_shutdown(code: int = 0):
+    global exit_code
+    exit_code = max(exit_code, code)
+    shutdown_event.set()
+
+
 async def mainloop():
-    # ESSENTIALS FOR MAINLOOP
-    import signal
-    from signal import signal as signal_fn, SIGINT, SIGTERM, SIGABRT
+    from signal import signal as signal_fn, Signals, SIGINT, SIGTERM, SIGABRT
 
-    signals = {k: v for v, k in vars(signal).items()
-               if v.startswith('SIG') and not v.startswith('SIG_')}
-    task = None
+    loop = asyncio.get_running_loop()
 
-    def signal_handler(signum, __):
-        logger.info(f'Stop signal received ({signals[signum]}). Exiting...')
-        task.cancel()
+    def on_signal(_sig: Signals):
+        logger.info(f'Stop signal received ({_sig.name}). Exiting...')
+        request_shutdown(0)
 
-    for s in (SIGINT, SIGTERM, SIGABRT):
-        signal_fn(s, signal_handler)
-    # ESSENTIALS FOR MAINLOOP END
+    def win_signal_handler(_loop):
+        def handler(signum, _frame):
+            try:
+                _loop.call_soon_threadsafe(on_signal, Signals(signum))
+            except RuntimeError:  # loop already closed
+                pass
+        return handler
 
-    while True:
-        task = asyncio.create_task(asyncio.sleep(1))
+    for sig in (SIGINT, SIGTERM, SIGABRT):
         try:
-            await task
-            if going_to_shutdown:
-                await terminate_all_connections()
-                sys.exit()
-        except asyncio.CancelledError:
-            break
+            loop.add_signal_handler(sig, on_signal, sig)
+        except NotImplementedError:  # windows
+            signal_fn(sig, win_signal_handler(loop))
+
+    await shutdown_event.wait()
 
 
 async def terminate_all_connections():
-    cs.exit()
-    if client.connected:
-        logger.info('Logout...')
-        client.logout()
-    await bot.stop()
-    if async_scheduler.running:
-        async_scheduler.shutdown()
-    if gevent_scheduler.running:
-        gevent_scheduler.shutdown()
+    for name, step in (('async scheduler', lambda: async_scheduler.shutdown(wait=False) if async_scheduler.running else None),
+                       ('gevent scheduler', lambda: gevent_scheduler.shutdown(wait=False) if gevent_scheduler.running else None),
+                       ('cs', cs.exit),
+                       ('steam', lambda: client.logout() if client.connected else None)):
+        # noinspection PyBroadException
+        try:
+            step()
+        except Exception:
+            logger.exception(f'Failed to stop {name}')
+
+    # noinspection PyBroadException
+    try:
+        if bot.is_connected:
+            await bot.stop()
+    except Exception:
+        logger.exception('Failed to stop bot')
     logger.info('Terminated.')
 
 
@@ -380,16 +406,17 @@ async def main():
 
         if result != EResult.OK:
             logger.error(f"Failed to login: {result!r}")
-            sys.exit(1)
+            request_shutdown(1)
+            return
 
         logger.info('Logged in successfully.')
         await bot.start()
         await mainloop()
-    except KeyboardInterrupt:
+    finally:
         await terminate_all_connections()
-        raise
 
 
 if __name__ == '__main__':
     # why not `asyncio.run`? short answer: https://pastebin.com/qTECqGwq
     asyncio.get_event_loop().run_until_complete(main())
+    sys.exit(exit_code)
