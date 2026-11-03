@@ -135,8 +135,8 @@ async def unique_monthly():
 async def check_currency():
     try:
         new_prices = ExchangeRate.request(steam_webapi).asdict()
-    except Exception as e:
-        logger.warning(f"Couldn't parse exchange rate: {e}.")
+    except Exception:
+        logger.exception(f"Couldn't parse exchange rate.")
         return
 
     logger.info(f'they fixed the GetAssetPrices! {new_prices=}')
@@ -161,7 +161,7 @@ async def fetch_leaderboard():
 
         caching.dump_cache_changes(config.LEADERBOARD_SEASON_CACHE_FILE_PATH, new_data)
     except requests.exceptions.JSONDecodeError as e:
-        logger.warning(f"Couldn't parse world leaderboard stats: {e}.",
+        logger.warning(f"Couldn't parse world leaderboard stats.",
                       f" Probably closed.")
 
 
