@@ -1,29 +1,28 @@
 aiosqlite==0.22.1
-alembic==1.20.0
+alembic==1.20.1
 APScheduler==3.11.3
 Babel==2.18.0
 betterproto==2.0.0b6
 csgo @ git+https://github.com/SyberiaK/csgo.git@ec2b3a3b3971ec066b584524cefb57377ab818dc
 csxhair==2.0.1
-filelock==3.32.7
+filelock==4.2.7
 httpx==0.28.1
 Jinja2==3.1.6
 Kurigram==2.2.26
 matplotlib==3.11.2
-numpy==2.5.3
-pandas==3.0.6
+numpy==2.5.4
+pandas==3.1.0
 protobuf==3.20.3
 pyropatch==2.1
-pytest==9.1.1
 requests==2.34.2
 seaborn==0.13.2
 sl10n==0.3.0.0
-SQLAlchemy==2.0.54
+SQLAlchemy==2.1.6
 SQLAlchemy-serializer==1.6.3
 steam-rv[client]==1.5.3
 telegraph==2.2.0
 TgCrypto==1.2.5
 TgEntity==0.2.0
-tzdata==2026.4
+tzdata==2026.6
 urllib3==2.8.0  # steam-rv lists urllib3<2 despite it not breaking anything and only being used for dev scripts
-uvloop==0.19.0; sys_platform == 'linux'
+uvloop==0.23.0; sys_platform == 'linux'
