@@ -3,12 +3,12 @@
   "disable_existing_loggers": false,
   "formatters": {
     "simple": {
-      "format": "{asctime} | {name}: {message}",
+      "format": "{asctime} | [{levelname}] {name}: {message}",
       "datefmt": "%H:%M:%S - %d/%m/%Y (%z)",
       "style": "{"
     },
     "detailed": {
-      "format": "{asctime} | {name:<17} | L{lineno:<4} | [{levelname:^8}]: {message}",
+      "format": "{asctime} | [{levelname}] {name} | L{lineno} : {message}",
       "datefmt": "%Y-%m-%dT%H:%M:%S%z",
       "style": "{"
     }
@@ -26,8 +26,8 @@
       "when": "MIDNIGHT",
       "maxBytes": 16777216,
       "backupCount": 5,
-      "level": "INFO",
-      "formatter": "simple"
+      "level": "DEBUG",
+      "formatter": "detailed"
     },
     "queue_handler": {
       "class": "logging.handlers.QueueHandler",
@@ -40,10 +40,22 @@
   },
   "loggers": {
     "root": {
-      "level": "DEBUG",
+      "level": "INFO",
       "handlers": [
         "queue_handler"
       ]
+    },
+    "pyrogram": {
+      "level": "WARNING"
+    },
+    "apscheduler": {
+      "level": "WARNING"
+    },
+    "httpx": {
+      "level": "WARNING"
+    },
+    "httpcore": {
+      "level": "WARNING"
     }
   }
 }

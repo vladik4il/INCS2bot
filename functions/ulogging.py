@@ -31,10 +31,7 @@ class EnhancedRotatingFileHandler(TimedRotatingFileHandler):
             self.stream.seek(0, 2)  # due to non-posix-compliant Windows feature
             if self.stream.tell() + len(msg) >= self.maxBytes:
                 return True
-        t = int(time.time())
-        if t >= self.rolloverAt:
-            return True
-        return False
+        return int(time.time()) >= self.rolloverAt
 
     @override
     def doRollover(self):
@@ -50,18 +47,15 @@ class EnhancedRotatingFileHandler(TimedRotatingFileHandler):
             timeTuple = time.localtime(t)
             dstThen = timeTuple[-1]
             if dstNow != dstThen:
-                if dstNow:
-                    addend = 3600
-                else:
-                    addend = -3600
+                addend = 3600 if dstNow else -3600
                 timeTuple = time.localtime(t + addend)
         dfn = self.baseFilename + "." + time.strftime(self.suffix, timeTuple)
         if self.backupCount > 0:
             cnt=1
-            dfn2="%s.%03d"%(dfn,cnt)
+            dfn2=f"{dfn}.{cnt:03}"
             while os.path.exists(dfn2):
-                dfn2="%s.%03d"%(dfn,cnt)
                 cnt+=1
+                dfn2=f"{dfn}.{cnt:03}"
             os.rename(self.baseFilename, dfn2)
             for s in self.getFilesToDelete():
                 os.remove(s)
@@ -69,20 +63,18 @@ class EnhancedRotatingFileHandler(TimedRotatingFileHandler):
             if os.path.exists(dfn):
                 os.remove(dfn)
             os.rename(self.baseFilename, dfn)
-        #print "%s -> %s" % (self.baseFilename, dfn)
         self.mode = 'w'
         self.stream = self._open()
         newRolloverAt = self.computeRollover(currentTime)
         while newRolloverAt <= currentTime:
             newRolloverAt = newRolloverAt + self.interval
-        #If DST changes and midnight or weekly rollover, adjust for this.
+        # if DST changes and midnight or weekly rollover, adjust for this.
         if (self.when == 'MIDNIGHT' or self.when.startswith('W')) and not self.utc:
             dstAtRollover = time.localtime(newRolloverAt)[-1]
             if dstNow != dstAtRollover:
-                if not dstNow:  # DST kicks in before next rollover, so we need to deduct an hour
-                    addend = -3600
-                else:           # DST bows out before next rollover, so we need to add an hour
-                    addend = 3600
+                # if DST kicks in before next rollover, we need to deduct an hour
+                # if DST bows out before next rollover, we need to add an hour
+                addend = 3600 if dstNow else -3600
                 newRolloverAt += addend
         self.rolloverAt = newRolloverAt
 
@@ -93,22 +85,18 @@ class EnhancedRotatingFileHandler(TimedRotatingFileHandler):
 
         More specific than the earlier method, which just used glob.glob().
         """
-        dirName, baseName = os.path.split(self.baseFilename)
-        fileNames = os.listdir(dirName)
+        dir_name, base_name = os.path.split(self.baseFilename)
+        file_names = os.listdir(dir_name)
         result = []
-        prefix = baseName + "."
+        prefix = base_name + "."
         plen = len(prefix)
-        for fileName in fileNames:
-            if fileName[:plen] == prefix:
-                suffix = fileName[plen:-4]
+        for file_name in file_names:
+            if file_name[:plen] == prefix:
+                suffix = file_name[plen:-4]
                 if self.extMatch.match(suffix):
-                    result.append(os.path.join(dirName, fileName))
+                    result.append(os.path.join(dir_name, file_name))
         result.sort()
-        if len(result) < self.backupCount:
-            result = []
-        else:
-            result = result[:len(result) - self.backupCount]
-        return result
+        return result[:len(result) - self.backupCount] if len(result) >= self.backupCount else []
 
 
 def setup_logging(config_file: str | Path = None):
