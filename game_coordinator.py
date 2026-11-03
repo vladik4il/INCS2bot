@@ -9,8 +9,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.schedulers.gevent import GeventScheduler
 from csgo.client import CSGOClient
 import gevent
+import httpx
 from pyrogram import Client
-import requests
 from pyrogram.types import LinkPreviewOptions
 from steam.client import SteamClient
 from steam.enums import EResult
@@ -257,27 +257,25 @@ async def handle_public_branch_update(client_version: int | None, new_buildid: s
     await send_branch_alert('public', 'public_branch_updated', new_buildid)
 
 
-async def get_game_version_loop(cached_client_version: int | None) -> GameVersionData:
-    timeout = 30 * 60
-    timeout_start = time.time()
-    with requests.Session() as session:
-        while time.time() < timeout_start + timeout:
-            data = await get_game_version(session, cached_client_version)
-            if data:
-                return data
-            logger.warning('Failed to pull the game version data, retry in 45 seconds...')
-            await asyncio.sleep(45)
-    # xPaw: Zzz...
-    # because of this, we retry in an hour
-    logger.warning('Reached a timeout while trying to pull the game version data, retry in an hour...')
-    await asyncio.sleep(60 * 60)
-    return await get_game_version_loop(cached_client_version)
+async def get_game_version_loop(cached_client_version: int | None, timeout: int = 30 * 60) -> GameVersionData:
+    while True:
+        deadline = time.monotonic() + timeout
+        async with httpx.AsyncClient() as session:
+            while time.monotonic() < deadline:
+                data = await get_game_version(session, cached_client_version)
+                if data:
+                    return data
+                logger.warning('Failed to pull the game version data, retry in 45 seconds...')
+                await asyncio.sleep(45)
+        # xPaw: Zzz...
+        logger.warning('Reached a timeout while trying to pull the game version data, retry in an hour...')
+        await asyncio.sleep(60 * 60)
 
 
-async def get_game_version(session: requests.Session, cached_client_version: int | None) -> GameVersionData | None:
+async def get_game_version(session: httpx.AsyncClient, cached_client_version: int | None) -> GameVersionData | None:
     # noinspection PyBroadException
     try:
-        data = GameVersion.request(session)
+        data = await GameVersion.request(session)
 
         if cached_client_version is None:  # *somehow* don't have anything cached
             logger.info('Successfully pulled the game version data.')

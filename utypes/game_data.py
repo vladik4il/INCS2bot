@@ -12,7 +12,7 @@ from .steam_webapi import SteamWebAPI, CS2_PREMIER_LEADERBOARD_REGIONS
 from .protobufs import ScoreLeaderboardData
 
 if TYPE_CHECKING:
-    import requests
+    import httpx
 
     from .states import State
 
@@ -173,8 +173,9 @@ class GameVersion:
     CS2_VERSION_DATA_URL = 'https://raw.githubusercontent.com/SteamDatabase/GameTracking-CS2/master/game/csgo/steam.inf'
 
     @classmethod
-    def request(cls, session: requests.Session):
-        cs2_data = session.get(cls.CS2_VERSION_DATA_URL).text
+    async def request(cls, session: httpx.AsyncClient):
+        response = await session.get(cls.CS2_VERSION_DATA_URL)
+        cs2_data = response.text
         config_entries = (line for line in cs2_data.split('\n') if line)
 
         options = {}
