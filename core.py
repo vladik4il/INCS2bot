@@ -136,6 +136,7 @@ async def check_currency():
     try:
         new_prices = ExchangeRate.request(steam_webapi).asdict()
     except Exception as e:
+        logger.warning(f"Couldn't parse exchange rate: {e}.")
         return
 
     logger.info(f'they fixed the GetAssetPrices! {new_prices=}')
@@ -145,6 +146,7 @@ async def check_currency():
 @scheduler.scheduled_job('cron',
                          hour=execution_cron.hour, minute=execution_cron.minute, second=0,
                          misfire_grace_time=MISFIRE_GRACE_TIME)
+@exception_handler(message='Caught exception fetching leaderboards!', retry=True)
 async def fetch_leaderboard():
     # noinspection PyBroadException
     try:
@@ -158,15 +160,12 @@ async def fetch_leaderboard():
             new_data[f'regional_leaderboard_stats_{region}'] = regional_leaderboard_stats
 
         caching.dump_cache_changes(config.LEADERBOARD_SEASON_CACHE_FILE_PATH, new_data)
-    except requests.exceptions.JSONDecodeError:  # leaderboards closed?
-        pass
-    except Exception:
-        logger.exception('Caught exception fetching leaderboards!')
-        await asyncio.sleep(45)
-        return await fetch_leaderboard()
+    except requests.exceptions.JSONDecodeError as e:
+        logger.warning(f"Couldn't parse world leaderboard stats: {e}.",
+                      f" Probably closed.")
 
 
-@exception_handler(message='Caught exception while gathering key price!', retry=True)
+@exception_handler(message='Caught exception while alerting player count all-time peak!', retry=True)
 async def alert_players_peak():
     cache = caching.load_cache(config.CORE_CACHE_FILE_PATH)
 
