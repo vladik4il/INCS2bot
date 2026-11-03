@@ -115,8 +115,11 @@ def handle_error(result):
 def send_relogin():
     logger.debug(f'"{SteamClient.EVENT_CHANNEL_SECURED}" event triggered...')
     if client.relogin_available:
-        client.relogin()
-        logger.debug('Re-logged in successfully.')
+        result = client.relogin()
+        if result == EResult.OK:
+            logger.debug('Re-logged in successfully.')
+        else:
+            logger.error(f"Failed to re-login: {result!r}")
 
 
 @client.on(SteamClient.EVENT_CONNECTED)
@@ -166,14 +169,15 @@ def update_gc_status(status):
 
     logger.info(f'Successfully dumped game coordinator status: {game_coordinator_state}')
 
-
-@async_scheduler.scheduled_job('interval', seconds=45)
+@async_scheduler.scheduled_job('interval', seconds=45, misfire_grace_time=MISFIRE_GRACE_TIME, max_instances=1)
 async def update_depots():
-    global going_to_shutdown
-
     # noinspection PyBroadException
     try:
-        data = client.get_product_info(apps=[730, 2275500, 2275530], timeout=15)['apps']
+        response = client.get_product_info(apps=[730, 2275500, 2275530], timeout=15)
+        if not response:
+            logger.error(f'Failed to fetch depots, get_product_info() returned {response!r}')
+            return
+        data = response['apps']
 
         current_branches = data[730]['depots']['branches']
         cs2_app_change_number = data[2275500]['_change_number']
@@ -194,19 +198,25 @@ async def update_depots():
         'branches': current_branches
     }
 
-    for key, new_value in new_data.items():
-        old_value = cache.get(key)
-        if old_value is None or old_value == new_value:
-            continue
+    caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, new_data)
 
-        if key == 'branches':
-            await check_for_new_branches(cache, old_value, new_value)
-            await check_for_removed_branches(old_value, new_value)
-            # mutates `cache` var in case of "public" branch update
-            await check_for_branches_updates(cache, old_value, new_value)
-        else:
-            # I am an idiot but oh well
-            await send_branch_alert('<null>', key, new_value)
+    # noinspection PyBroadException
+    try:
+        for key, new_value in new_data.items():
+            old_value = cache.get(key)
+            if old_value is None or old_value == new_value:
+                continue
+
+            if key == 'branches':
+                await check_for_new_branches(cache, old_value, new_value)
+                await check_for_removed_branches(old_value, new_value)
+                await check_for_branches_updates(cache, old_value, new_value)
+            else:
+                # I am an idiot but oh well
+                await send_branch_alert('<null>', key, new_value)
+    except Exception:
+        logger.exception('Caught an exception while trying to fetch depots!')
+        return
 
     caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, new_data)
 
@@ -222,12 +232,16 @@ async def check_for_new_branches(cache: dict, cached_branches: dict, current_bra
 
     for branch_name in new_branches:
         branch_data = current_branches[branch_name]
+        new_buildid = branch_data.get('buildid')
+        if new_buildid is None:
+            logger.warning(f'Branch {branch_name} has no buildid!')
+            continue
 
         if is_backup_branch(branch_name):
             event = 'backup_branch_created_sync' if branch_name == cs2_patch_version else 'backup_branch_created'
         else:
             event = 'misc_branch_created'
-        await send_branch_alert(branch_name, event, branch_data['buildid'])
+        await send_branch_alert(branch_name, event, new_buildid)
 
 
 async def check_for_removed_branches(cached_branches: dict, current_branches: dict):
@@ -251,8 +265,11 @@ async def check_for_branches_updates(cache: dict, cached_branches: dict, current
 
         if cached_branch_data is None:  # newly created, ignore
             continue
-        old_buildid = cached_branch_data['buildid']
-        new_buildid = branch_data['buildid']
+        old_buildid = cached_branch_data.get('buildid')
+        new_buildid = branch_data.get('buildid')
+        if new_buildid is None:
+            logger.warning(f'Branch {branch_name} has no buildid!')
+            continue
         if old_buildid == new_buildid:
             continue
 
@@ -312,6 +329,10 @@ async def get_game_version(session: httpx.AsyncClient, cached_client_version: in
 def online_players():
     player_count = client.get_player_count(730)
 
+    if isinstance(player_count, EResult):
+        logger.error(f'Failed to fetch player count, got {player_count!r}')
+        return
+
     caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, {'online_players': player_count})
 
     logger.info(f'Successfully dumped player count: {player_count}')
@@ -335,15 +356,14 @@ async def send_branch_alert(branch: str, event: str, new_buildid: str = None):
 
 
 async def send_text_alert(text: str):
-    if bot.test_mode:
-        chat_list = [config.AQ]
-    else:
-        chat_list = [config.INCS2CHAT, config.CSTRACKER]
-
-    for chat_id in chat_list:
-        msg = await bot.send_message(chat_id, text, link_preview_options=LinkPreviewOptions(is_disabled=True))
-        if chat_id == config.INCS2CHAT:
-            await msg.pin(disable_notification=True)
+    for chat_id in config.CHAT_LIST:
+        # noinspection PyBroadException
+        try:
+            msg = await bot.send_message(chat_id, text, link_preview_options=LinkPreviewOptions(is_disabled=True))
+            if chat_id == config.INCS2CHAT:
+                await msg.pin(disable_notification=True)
+        except Exception:
+            logger.exception('Failed to send alert!')
 
 
 def request_shutdown(code: int = 0):
