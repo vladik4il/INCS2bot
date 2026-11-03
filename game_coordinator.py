@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import asyncio
 import datetime as dt
-import platform
 import sys
 import time
+from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -15,16 +17,14 @@ from pyrogram.types import LinkPreviewOptions
 from steam.client import SteamClient
 from steam.enums import EResult
 
-if platform.system() == 'Linux':
-    # noinspection PyPackageRequirements,PyUnresolvedReferences
-    import uvloop
-
-    uvloop.install()
-
 import config
 from functions import caching, locale, utime
 from functions.ulogging import *
-from utypes import GameVersion, States, GameVersionData
+from utypes import GameVersion, States
+
+if TYPE_CHECKING:
+    from utypes import GameVersionData
+
 
 VALVE_TIMEZONE = ZoneInfo('America/Los_Angeles')
 loc = locale('ru')
@@ -41,6 +41,9 @@ AVAILABLE_ALERTS = {'public_branch_updated': loc.notifs_build_public,
                     'misc_branch_updated': loc.notifs_misc_branch_updated,
                     'branch_deleted': loc.notifs_branch_deleted}
 MAIN_BRANCHES = {'public', '<null>'}  # <null> is for other important things
+
+GC_STATUSES = {0: States.NORMAL, 1: States.INTERNAL_SERVER_ERROR, 2: States.OFFLINE,
+               3: States.RELOADING, 4: States.INTERNAL_STEAM_ERROR}
 
 MISFIRE_GRACE_TIME = 10
 
@@ -103,7 +106,7 @@ async_scheduler = AsyncIOScheduler()
 
 
 def is_backup_branch(name: str) -> bool:
-    return name.startswith('1.4') or name.startswith('1.3')
+    return name.startswith(('1.4', '1.3'))
 
 
 @client.on(SteamClient.EVENT_ERROR)
@@ -161,9 +164,7 @@ def cs_launched():
 
 @cs.on(CSGOClient.EVENT_CONNECTION_STATUS)
 def update_gc_status(status):
-    statuses = {0: States.NORMAL, 1: States.INTERNAL_SERVER_ERROR, 2: States.OFFLINE,
-                3: States.RELOADING, 4: States.INTERNAL_STEAM_ERROR}
-    game_coordinator_state = statuses.get(status, States.UNKNOWN).literal
+    game_coordinator_state = GC_STATUSES.get(status, States.UNKNOWN).literal
 
     caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, {'game_coordinator_state': game_coordinator_state})
 
@@ -218,9 +219,7 @@ async def update_depots():
         logger.exception('Caught an exception while trying to fetch depots!')
         return
 
-    caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, new_data)
-
-    logger.info('Successfully dumped game version data.')
+    logger.debug('Successfully dumped game version data.')
 
 
 async def check_for_new_branches(cache: dict, cached_branches: dict, current_branches: dict):
@@ -284,8 +283,8 @@ async def check_for_branches_updates(cache: dict, cached_branches: dict, current
 
 
 async def handle_public_branch_update(client_version: int | None, new_buildid: str | None):
-    game_version_data = await get_game_version_loop(client_version)
-    caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, game_version_data.asdict())
+    data = await get_game_version_loop(client_version)
+    caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, data.asdict())
     await send_branch_alert('public', 'public_branch_updated', new_buildid)
 
 
@@ -313,7 +312,6 @@ async def get_game_version(session: httpx.AsyncClient, cached_client_version: in
             logger.info('Successfully pulled the game version data.')
             return data
 
-        # Ensure that the data is up-to-date, so we check datetime
         new_data_datetime = (dt.datetime.fromtimestamp(data.cs2_version_timestamp)
                              .replace(tzinfo=VALVE_TIMEZONE).astimezone(dt.UTC))
         is_up_to_date = (utime.utcnow() - new_data_datetime < dt.timedelta(hours=12))
@@ -335,7 +333,7 @@ def online_players():
 
     caching.dump_cache_changes(config.GC_CACHE_FILE_PATH, {'online_players': player_count})
 
-    logger.info(f'Successfully dumped player count: {player_count}')
+    logger.debug(f'Successfully dumped player count: {player_count}')
 
 
 async def send_branch_alert(branch: str, event: str, new_buildid: str = None):
@@ -437,6 +435,13 @@ async def main():
 
 
 if __name__ == '__main__':
+    try:
+        # noinspection PyPackageRequirements,PyUnresolvedReferences
+        import uvloop
+
+        uvloop.run(main())
+    except ImportError:
+        asyncio.run(main())
     # why not `asyncio.run`? short answer: https://pastebin.com/qTECqGwq
     asyncio.get_event_loop().run_until_complete(main())
     sys.exit(exit_code)
