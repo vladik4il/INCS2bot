@@ -182,12 +182,7 @@ async def send_alert(key, new_value):
         logger.warning(f'Got wrong key to send alert: {key}')
         return
 
-    if bot.test_mode:
-        chat_list = [config.AQ]
-    else:
-        chat_list = [config.INCS2CHAT, config.CSTRACKER]
-
-    for chat_id in chat_list:
+    for chat_id in config.CHAT_LIST:
         msg = await bot.send_message(chat_id, text)
         if chat_id == config.INCS2CHAT:
             await msg.pin(disable_notification=True)
